@@ -18,6 +18,7 @@ class KMeans:
 
         self.metadata = {i: [] for i in range(self.k)}
         self.clusteroids = random.sample(range(self.datalen), self.k)
+        print("Clusteroid: ", self.clusteroids)
 
     def read_csv(self):  # not used
         df = pd.read_csv(self.data_path)
@@ -27,14 +28,14 @@ class KMeans:
         clusterroid = []
         for i, c in enumerate(self.clusteroids):
             index_points = self.metadata[i]
-
+            print(i, ")len points: ", len(index_points))
             total_dist = []
             for point_i in index_points:
-                sum = 0
+                sm = 0
                 for point_j in index_points:
-                    sum += my_utils.get_jaccard(self.df_genres[point_i], self.df_genres[point_j])
-                total_dist.append(sum)
-            clusterroid.append(index_points[total_dist.index(min(total_dist))])
+                    sm += my_utils.get_jaccard(self.df_genres[point_i], self.df_genres[point_j], '|')
+                total_dist.append(sm)
+            clusterroid.append(index_points[total_dist.index(max(total_dist))])
         return clusterroid
 
     def run(self):
@@ -44,10 +45,13 @@ class KMeans:
             for i, gern in enumerate(self.df_genres):
                 dists = []
                 for j, c in enumerate(self.clusteroids):
-                    dists.append(my_utils.get_jaccard(gern, self.df_genres[c]))
+                    dists.append(my_utils.get_jaccard(gern, self.df_genres[c], '|'))
+                # print("Dists: ", dists)
+                # print("min, ci", max(dists), ",", dists.index(max(dists)))
+                self.metadata[dists.index(max(dists))].append(i)
 
-                self.metadata[dists.index(min(dists))].append(i)
-
+            print("updating clusteroids")
+            self.metadata_stats()
             self.clusteroids = self.get_clusteroid(self.metadata)
             iterations += 1
             print(iterations, " iteration done in ", time.time()-start)
@@ -55,6 +59,8 @@ class KMeans:
         print("Finish, took: ", time.time()-start)
         [print(i, self.df_genres) for i in self.clusteroids]
 
+    def metadata_stats(self):
+        [print(i, len(self.metadata[i])) for i in self.metadata]
 
 
 

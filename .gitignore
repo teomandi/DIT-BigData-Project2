@@ -4,3 +4,5 @@ ml-25m/
 *.pyc
 .idea/
 *.xml
+__pycache__
+idea/workspace.xml
