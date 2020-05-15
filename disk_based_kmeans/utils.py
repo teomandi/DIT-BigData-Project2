@@ -10,7 +10,7 @@ def file_len(fname):
     return i + 1
 
 
-def get_jaccard(str1, str2, delimiter=","):
+def get_jaccard(str1, str2, delimiter="|"):
     a = set(str1.split(delimiter))
     b = set(str2.split(delimiter))
     c = a.intersection(b)
