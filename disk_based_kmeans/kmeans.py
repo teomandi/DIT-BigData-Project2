@@ -30,36 +30,29 @@ class KMeans(object):
             if iteration == 0:
                 random_clusters_ids = random.sample(range(self.chunk_size), self.k)
                 self.discard = [Cluster(i, index, chunk['genres'][index]) for i, index in enumerate(random_clusters_ids)]
-
-            for index, record in enumerate(chunk['genres']):
-                idx = index + self.chunk_size*iteration
-
-                if idx in random_clusters_ids:
+            for index, record in zip(chunk['movieId'], chunk['genres']):
+                # idx = index + self.chunk_size*iteration
+                if index in random_clusters_ids:
                     continue
                 # calculate the distance with each cluster
                 dists = []
                 for cluster in self.discard:
                     dists.append(get_jaccard(cluster.clusteroid, record))
-
                 # if it is over than threshold add it to DC
                 if max(dists) >= self.threshold:
-                    self.discard[dists.index(max(dists))].add_temp_point(record, idx)
+                    self.discard[dists.index(max(dists))].add_temp_point(index, record)
                 else:
                     # add it to retained set
-                    self.remaining.append(RemainEntity((idx, record)))  # <--
-
+                    self.remaining.append(RemainEntity((index, record)))  # <--
             # calculate the new clusteroids in the discard set
             for c in self.discard:
                 c.consume()
             # handle retain set
             # self.remaining = hierarchical_cluster(self.remaining, self.threshold)
-            # break
             iteration += 1
-
         # end of dataset parse
         print("Iterations:", iteration)
         print("Took {:.3f}".format(time.time()-starting_tm))
-
 
     def export(self, export=True):
         for remain in self.remaining:
@@ -85,8 +78,7 @@ class KMeans(object):
         results = sorted(results, key=lambda tup: tup[0])
         with open('results.csv', 'a') as f:
             for res in results:
-                id = res[0] + 1
-                f.write(str(id) + "," + str(res[1]) + "\n")
+                f.write(str(res[0]) + "," + str(res[1]) + "\n")
 
 
 

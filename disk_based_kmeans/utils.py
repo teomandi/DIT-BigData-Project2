@@ -1,5 +1,5 @@
 import time
-
+import csv
 
 def file_len(fname):
     start = time.time()
@@ -49,7 +49,21 @@ def hierarchical_cluster(remained, threshold):
 
     return remained
 
+def get_tags():
+    with open(tags_path) as f:
+        iteration = 0
+        for chunk in pd.read_csv(movies_path, chunksize=4000):
+            chunk_data = {}  # movie_id : [tags]
+            chunk_ids = chunk['movieId'].tolist()
+            reader = csv.reader(f)
+            for row in reader:
+                try:
+                    if int(row[1]) in chunk_ids:
+                        i
 
+            iteration += 1
+
+        # print(iteration)
 
 
 

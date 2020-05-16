@@ -12,7 +12,7 @@ class Cluster(object):
         # list the temporary items are kept here
         self.temp = []  # list with tuples (id, content)
 
-    def add_temp_point(self, content, idx):
+    def add_temp_point(self, idx, content):
         self.temp.append((idx, content))
 
     def consume(self):
