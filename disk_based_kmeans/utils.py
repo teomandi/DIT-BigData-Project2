@@ -159,6 +159,22 @@ class UserRatings(object):
         print("VectorS created in took {:.3f}".format(time.time() - vector_tm))
         return vectors
 
+    def get_huge_vector(self, movies_id):
+        vector_tm = time.time()
+        print("Creating Huge Vector")
+        huge_vector = np.zeros((len(movies_id), len(self.user_info)))
+        print(huge_vector.shape)
+        for user_id in self.user_info:
+            for movie_id in self.user_info[user_id]:
+                if movie_id in movies_id:
+                    huge_vector[movies_id.index(movie_id)][user_id-1] = self.user_info[user_id][movie_id]
+        print("VectorS ", huge_vector.shape, " created in took {:.3f}".format(time.time() - vector_tm))
+        return sparse.csr_matrix(huge_vector)
+
+
+
+
+
 
 # def rating_vector():
 #     print("getting ratings vector")
