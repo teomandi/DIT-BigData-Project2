@@ -5,16 +5,18 @@ import random
 import csv
 import numpy as np
 
-from scipy import sparse
 from sklearn.metrics.pairwise import cosine_similarity
 
-from utils import hierarchical_cluster, get_jaccard, recreate_file, rating_vector
+from utils import hierarchical_cluster, get_jaccard, recreate_file, get_rating_vectors, UserRatings
 from cluster import Cluster, RemainEntity
 
 
 class KMeans(object):
 
     def __init__(self, data_path, k=4, threshold=0.6, chunk_size=4000, distance_f="d1", ratings_path=None):
+        if k > chunk_size:
+            print("Error: K bigger than cluster size")
+            exit(1)
         self.data_path = data_path
         self.k = k
         self.threshold = threshold
@@ -122,46 +124,35 @@ class KMeans(object):
         starting_tm = time.time()
         random_clusters_ids = []
         iteration = 0
+        user_ratings = UserRatings(self.ratings_path)
         for chunk in pd.read_csv(self.data_path, chunksize=self.chunk_size):
-            # create the vectors of the chunk
             vectors_tm = time.time()
-            chunk_vector = {}
             chunk_ids = chunk['movieId'].tolist()
+            chunk_vector = {}  # user_ratings.get_many_vectors(chunk_ids)
             for movie_id in chunk_ids:
-                chunk_vector[movie_id] = np.zeros(162541)
-            with open(self.ratings_path) as f:
-                reader = csv.reader(f)
-                for row in reader:
-                    try:  # for the first row
-                        user_id = int(row[0])
-                        movie_id = int(row[1])
-                        rating = float(row[2])
-                    except:
-                        continue
-                    if movie_id in chunk_ids:
-                        chunk_vector[movie_id][user_id - 1] = rating
-            for movie_id in chunk_ids:
-                chunk_vector[movie_id] = sparse.csr_matrix(chunk_vector[movie_id])
-            # initialize the clusteroid
+                chunk_vector[movie_id] = user_ratings.get_vector(movie_id)
+            print("All vector created in: {:.3f}".format(time.time() - vectors_tm))
+
             if iteration == 0:
                 random_clusters_ids = [chunk['movieId'][i] for i in random.sample(range(self.chunk_size), self.k)]
-                # TODO find better k starting clusters
                 self.discard = [Cluster(i, index, chunk_vector[index]) for i, index in enumerate(random_clusters_ids)]
+            clustering_tm = time.time()
             for movie_id in chunk_vector:
                 if movie_id in random_clusters_ids:
                     continue
                 dists = []
                 for cluster in self.discard:
-                    dists.append(cosine_similarity(cluster.clusteroid, chunk_vector[movie_id])[0][0])
-                    # if it is over than threshold add it to DC
+                    cs = cosine_similarity(cluster.clusteroid, chunk_vector[movie_id])[0][0]
+                    dists.append(cs)
                 if max(dists) >= self.threshold:
+                    print("hit")
                     self.discard[dists.index(max(dists))].add_temp_point(movie_id, chunk_vector[movie_id])
                 else:
-                    # add it to retained set
                     self.remaining.append(RemainEntity((movie_id, chunk_vector[movie_id])))
-                # calculate the new clusteroids in the discard set
-                for c in self.discard:
-                    c.consume(f="cosine")
+            print("Clustering part took {:.3f}".format(time.time()-clustering_tm))
+
+            for c in self.discard:
+                c.consume(f="cosine")
             print("chunk ", iteration, " in: {:.3f}".format(time.time() - vectors_tm))
             iteration += 1
 
@@ -210,10 +201,10 @@ if __name__ == '__main__':
     ratings_path = os.path.join("..", "ml-25m", "ratings.csv")
     new_datafile_path = os.path.join("..", "ml-25m", "new_movies_tag_file.csv")
 
-    kmean = KMeans(new_datafile_path, k=15, threshold=0.8, chunk_size=100, distance_f="d3", ratings_path=ratings_path)
+    kmean = KMeans(new_datafile_path, k=15, threshold=0.5, chunk_size=1000, distance_f="d3", ratings_path=ratings_path)
     kmean.fit()
-    kmean.absorb()
-    kmean.export()
+    # kmean.absorb()
+    # kmean.export()
 
     # rating_vector()
     # recreate_file()

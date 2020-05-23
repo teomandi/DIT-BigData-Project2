@@ -47,7 +47,7 @@ class Cluster(object):
         print(
             "Consuming took {:.3f}".format(time.time()-starting_tm),
             ":: Key ~>", self.key,
-            "CLRD ~>", self.clusteroid,
+            # "CLRD ~>", self.clusteroid,
             "membership ", len(self.membership)
         )
 

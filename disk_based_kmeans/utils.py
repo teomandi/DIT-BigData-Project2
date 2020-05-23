@@ -3,6 +3,7 @@ import csv
 import os
 import pandas as pd
 import numpy as np
+from scipy import sparse
 
 
 def file_len(fname):
@@ -51,6 +52,31 @@ def hierarchical_cluster(remained, threshold):
     return remained
 
 
+def get_rating_vectors(chunk_ids, ratings_path):
+    chunk_vector = {}
+    # initialize the vectors
+    init_tm = time.time()
+    for movie_id in chunk_ids:
+        chunk_vector[movie_id] = np.zeros(162541)
+    print("init time: {:.3f}".format(time.time() - init_tm))
+    # parse to get the ratings
+    parse_tm = time.time()
+    with open(ratings_path) as f:
+        reader = csv.reader(f)
+        for row in reader:
+            try:  # for the first row
+                user_id = int(row[0])
+                movie_id = int(row[1])
+                rating = float(row[2])
+            except:
+                continue
+            if movie_id in chunk_ids:
+                chunk_vector[movie_id][user_id - 1] = rating
+    for movie_id in chunk_ids:
+        chunk_vector[movie_id] = sparse.csr_matrix(chunk_vector[movie_id])
+    print("parsing time: {:.3f}".format(time.time() - parse_tm))
+
+
 def recreate_file(
         tags_path="../ml-25m/tags.csv",
         movies_path="../ml-25m/movies.csv",
@@ -68,7 +94,6 @@ def recreate_file(
         for movie_id, genres_val in zip(chunk['movieId'], chunk['genres']):
             chunk_data[movie_id] = ([], genres_val)
         print("init in: {:.3f}".format(time.time() - init_tm))
-
         chunk_tm = time.time()
         print("Parsing chunk:: ", iteration)
         with open(tags_file_path) as f:
@@ -82,7 +107,6 @@ def recreate_file(
                     chunk_data[row_movie_id][0].append(row[2])
         iteration += 1
         print("Chunk-data parsed in {:.3f}".format(time.time() - chunk_tm))
-
         writing_tm = time.time()
         with open(output_path, 'a') as fout:
             for movie_id in chunk_data:
@@ -94,23 +118,12 @@ def recreate_file(
     print("File Created in {:.3f}".format(time.time() - starting_tm))
 
 
-def rating_vector():
-    print("getting ratings vector")
-    movies_file_path = os.path.join("..", "ml-25m", "movies.csv")
-    ratings_file_path = os.path.join("..", "ml-25m", "ratings.csv")
-    starting_tm = time.time()
-    i = 0
-    for chunk in pd.read_csv(movies_file_path, chunksize=4000):
-        chunk_time = time.time()
-        chunk_data = {}
-        chunk_ids = chunk['movieId'].tolist()
-
-        init_tm = time.time()
-        for idd in chunk_ids:
-            chunk_data[idd] = np.zeros(162541)
-        print("init in: {:.3f}".format(time.time() - init_tm))
-
-        with open(ratings_file_path) as f:
+class UserRatings(object):
+    def __init__(self, ratings_path):
+        print("Creating User structure")
+        self.user_info = {}  # { user_id : { movie_id : rating } }
+        starting_tm = time.time()
+        with open(ratings_path) as f:
             reader = csv.reader(f)
             for row in reader:
                 try:  # for the first row
@@ -119,9 +132,60 @@ def rating_vector():
                     rating = float(row[2])
                 except:
                     continue
-            if movie_id in chunk_ids:
-                chunk_data[movie_id][user_id-1] = rating
-        print("chunk ", i, " in: {:.3f}".format(time.time() - chunk_time))
-        # break
-        i += 1
-    print("Total process complete in: {:.3f}".format(time.time() - starting_tm))
+                if user_id not in self.user_info:
+                    self.user_info[user_id] = {movie_id : rating}
+                else:
+                    self.user_info[user_id][movie_id] = rating
+        print("user_info structure created in {:.3f}".format(time.time() - starting_tm))
+
+    def get_vector(self, movie_id):
+        vector = np.zeros(len(self.user_info))
+        for user_id in self.user_info:
+            if movie_id in self.user_info[user_id]:
+                vector[user_id-1] = self.user_info[user_id][movie_id]
+        return sparse.csr_matrix(vector)
+
+    def get_many_vectors(self, movies_id):
+        vector_tm = time.time()
+        vectors = {}  # { movie_id : vector }
+        for movie_id in movies_id:
+            vectors[movie_id] = np.zeros(len(self.user_info))
+        for user_id in self.user_info:
+            for movie_id in self.user_info[user_id]:
+                if movie_id in movies_id:
+                    vectors[movie_id][user_id-1] = self.user_info[user_id][movie_id]
+        for movies_id in vectors:
+            vectors[movies_id] = sparse.csr_matrix(vectors[movies_id])
+        print("VectorS created in took {:.3f}".format(time.time() - vector_tm))
+        return vectors
+
+
+# def rating_vector():
+#     print("getting ratings vector")
+#     movies_file_path = os.path.join("..", "ml-25m", "movies.csv")
+#     ratings_file_path = os.path.join("..", "ml-25m", "ratings.csv")
+#     starting_tm = time.time()
+#     i = 0
+#     for chunk in pd.read_csv(movies_file_path, chunksize=4000):
+#         chunk_time = time.time()
+#         chunk_data = {}
+#         chunk_ids = chunk['movieId'].tolist()
+#         init_tm = time.time()
+#         for idd in chunk_ids:
+#             chunk_data[idd] = np.zeros(162541)
+#         print("init in: {:.3f}".format(time.time() - init_tm))
+#         with open(ratings_file_path) as f:
+#             reader = csv.reader(f)
+#             for row in reader:
+#                 try:  # for the first row
+#                     user_id = int(row[0])
+#                     movie_id = int(row[1])
+#                     rating = float(row[2])
+#                 except:
+#                     continue
+#             if movie_id in chunk_ids:
+#                 chunk_data[movie_id][user_id-1] = rating
+#         print("chunk ", i, " in: {:.3f}".format(time.time() - chunk_time))
+#         # break
+#         i += 1
+#     print("Total process complete in: {:.3f}".format(time.time() - starting_tm))
