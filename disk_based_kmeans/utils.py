@@ -57,7 +57,7 @@ def get_rating_vectors(chunk_ids, ratings_path):
     # initialize the vectors
     init_tm = time.time()
     for movie_id in chunk_ids:
-        chunk_vector[movie_id] = np.zeros(162541)
+        chunk_vector[movie_id] = np.zeros(162541)  # hardcoded users size
     print("init time: {:.3f}".format(time.time() - init_tm))
     # parse to get the ratings
     parse_tm = time.time()
@@ -118,10 +118,10 @@ def recreate_file(
     print("File Created in {:.3f}".format(time.time() - starting_tm))
 
 
-class UserRatings(object):
+class UsersRatings(object):
     def __init__(self, ratings_path):
-        print("Creating User structure")
-        self.user_info = {}  # { user_id : { movie_id : rating } }
+        print("Creating Uses structure")
+        self.users_info = {}  # { user_id : { movie_id : rating } }
         starting_tm = time.time()
         with open(ratings_path) as f:
             reader = csv.reader(f)
@@ -132,28 +132,28 @@ class UserRatings(object):
                     rating = float(row[2])
                 except:
                     continue
-                if user_id not in self.user_info:
-                    self.user_info[user_id] = {movie_id : rating}
+                if user_id not in self.users_info:
+                    self.users_info[user_id] = {movie_id: rating}
                 else:
-                    self.user_info[user_id][movie_id] = rating
-        print("user_info structure created in {:.3f}".format(time.time() - starting_tm))
+                    self.users_info[user_id][movie_id] = rating
+        print("users_info structure created in {:.3f}".format(time.time() - starting_tm))
 
     def get_vector(self, movie_id):
-        vector = np.zeros(len(self.user_info))
-        for user_id in self.user_info:
-            if movie_id in self.user_info[user_id]:
-                vector[user_id-1] = self.user_info[user_id][movie_id]
+        vector = np.zeros(len(self.users_info))
+        for user_id in self.users_info:
+            if movie_id in self.users_info[user_id]:
+                vector[user_id-1] = self.users_info[user_id][movie_id]
         return sparse.csr_matrix(vector)
 
     def get_many_vectors(self, movies_id):
         vector_tm = time.time()
         vectors = {}  # { movie_id : vector }
         for movie_id in movies_id:
-            vectors[movie_id] = np.zeros(len(self.user_info))
-        for user_id in self.user_info:
-            for movie_id in self.user_info[user_id]:
+            vectors[movie_id] = np.zeros(len(self.users_info))
+        for user_id in self.users_info:
+            for movie_id in self.users_info[user_id]:
                 if movie_id in movies_id:
-                    vectors[movie_id][user_id-1] = self.user_info[user_id][movie_id]
+                    vectors[movie_id][user_id-1] = self.users_info[user_id][movie_id]
         for movies_id in vectors:
             vectors[movies_id] = sparse.csr_matrix(vectors[movies_id])
         print("VectorS created in took {:.3f}".format(time.time() - vector_tm))
@@ -162,19 +162,42 @@ class UserRatings(object):
     def get_huge_vector(self, movies_id):
         vector_tm = time.time()
         print("Creating Huge Vector")
-        huge_vector = np.zeros((len(movies_id), len(self.user_info)))
+        huge_vector = np.zeros((len(movies_id), len(self.users_info)))
         print(huge_vector.shape)
-        for user_id in self.user_info:
-            for movie_id in self.user_info[user_id]:
+        for user_id in self.users_info:
+            for movie_id in self.users_info[user_id]:
                 if movie_id in movies_id:
-                    huge_vector[movies_id.index(movie_id)][user_id-1] = self.user_info[user_id][movie_id]
-        print("VectorS ", huge_vector.shape, " created in took {:.3f}".format(time.time() - vector_tm))
+                    huge_vector[movies_id.index(movie_id)][user_id-1] = self.users_info[user_id][movie_id]
+        print("Vectors ", huge_vector.shape, " created in took {:.3f}".format(time.time() - vector_tm))
         return sparse.csr_matrix(huge_vector)
 
 
+class MoviesRatings(object):
+    def __init__(self, ratings_path):
+        print("Creating Movies structure")
+        self.movies_info = {}  # { movie_id : { user_id : rating } }
+        starting_tm = time.time()
+        with open(ratings_path) as f:
+            reader = csv.reader(f)
+            for row in reader:
+                try:  # for the first row
+                    user_id = int(row[0])
+                    movie_id = int(row[1])
+                    rating = float(row[2])
+                except:
+                    continue
+                if movie_id not in self.movies_info:
+                    self.movies_info[movie_id] = {user_id: rating}
+                else:
+                    self.movies_info[movie_id][user_id] = rating
+        print("movies_info structure created in {:.3f}".format(time.time() - starting_tm))
 
-
-
+    def get_vector(self, movie_id):
+        vector = np.zeros(162541)  # hardcoded users size
+        if movie_id in self.movies_info:
+            for user_id in self.movies_info[movie_id]:
+                vector[user_id-1] = self.movies_info[movie_id][user_id]
+        return sparse.csr_matrix(vector)
 
 # def rating_vector():
 #     print("getting ratings vector")

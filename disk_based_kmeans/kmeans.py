@@ -6,7 +6,7 @@ import argparse
 import os
 from sklearn.metrics.pairwise import cosine_similarity
 
-from utils import hierarchical_cluster, get_jaccard, recreate_file, get_rating_vectors, UserRatings
+from utils import hierarchical_cluster, get_jaccard, recreate_file, get_rating_vectors, UsersRatings, MoviesRatings
 from cluster import SimpleCluster, ComplexCluster, RemainEntity
 
 
@@ -203,7 +203,9 @@ class KMeans(object):
         starting_tm = time.time()
         random_clusters_ids = []
         iteration = 0
-        user_ratings = UserRatings(self.ratings_path)
+        # user_ratings = UsersRatings(self.ratings_path)
+        user_ratings = MoviesRatings(self.ratings_path)
+
         for chunk in pd.read_csv(self.data_path, chunksize=self.chunk_size):
             loop_tm = time.time()
             chunk_ids = chunk['movieId'].tolist()
@@ -228,6 +230,7 @@ class KMeans(object):
                     cs = cosine_similarity(cluster.clusteroid, chunk_vectors[movie_id])[0][0]
                     dists.append(cs)
                 if max(dists) >= self.threshold:
+                    print("hit")
                     self.discard[dists.index(max(dists))].add_temp_point(movie_id, chunk_vectors[movie_id])
                 else:
                     self.remaining.append(RemainEntity((movie_id, chunk_vectors[movie_id])))
@@ -244,7 +247,7 @@ class KMeans(object):
         starting_tm = time.time()
         random_clusters_ids = []
         iteration = 0
-        user_ratings = UserRatings(self.ratings_path)
+        user_ratings = UsersRatings(self.ratings_path)
         for chunk in pd.read_csv(self.data_path, chunksize=self.chunk_size):
             loop_tm = time.time()
             chunk_ids = chunk['movieId'].tolist()
@@ -297,6 +300,9 @@ class KMeans(object):
 
 
 if __name__ == '__main__':
+    # recreate_file()
+    # exit()
+
     parser = argparse.ArgumentParser(
         description='Disk Based KMeans. Project 2a Big-Data 2020',
         epilog='Enjoy the program! :)'
@@ -353,7 +359,7 @@ if __name__ == '__main__':
     print("d: ", d)
     print("t: ", t)
     print("chunk: ", chunk)
-    totel_tm = time.time()
+    total_tm = time.time()
 
     # movies_path = os.path.join("..", "ml-25m", "movies.csv")
     # ratings_path = os.path.join("..", "ml-25m", "ratings.csv")
@@ -366,3 +372,4 @@ if __name__ == '__main__':
     kmean.details()
     kmean.export()
 
+    print("Total duration(s): {:.3f}".format(time.time() - total_tm))
