@@ -1,12 +1,11 @@
 import pandas as pd
 import time
-import os
 import random
 import csv
-import numpy as np
-
+import argparse
+import os
 from sklearn.metrics.pairwise import cosine_similarity
-from scipy.sparse import hstack
+
 from utils import hierarchical_cluster, get_jaccard, recreate_file, get_rating_vectors, UserRatings
 from cluster import SimpleCluster, ComplexCluster, RemainEntity
 
@@ -26,6 +25,7 @@ class KMeans(object):
         self.is_list = False
         self.distance_f = distance_f
         self.absorb = self.simple_absorb
+        self.details = self.simple_details
         if self.distance_f == "d1":
             self.fit = self.fit_with_new
             self.target = 'genres'
@@ -45,6 +45,8 @@ class KMeans(object):
                 print("Error: No ratings path was given")
                 exit(1)
             self.ratings_path = ratings_path
+            self.details = self.complex_details
+
         else:
             print("Error: Unknown distance function was given")
             exit(1)
@@ -87,7 +89,14 @@ class KMeans(object):
             self.discard[dist.index(max(dist))].membership.append(remain['movie_id'])
         print("Absorb duration(s): {:.3f}".format(time.time()-starting_tm))
 
-    def details(self):
+    def simple_details(self):
+        total = 0
+        for disc in self.discard:
+            print("# CLRD: -", disc.key, "|", disc.clusteroid, " len:: ", len(disc.membership))
+            total += len(disc.membership)
+        print("Total Points: ", total)
+
+    def complex_details(self):
         total = 0
         for disc in self.discard:
             print("# CLRD: -", disc.key, "|", " len:: ", len(disc.membership))
@@ -106,7 +115,7 @@ class KMeans(object):
         with open(output_name, 'w') as f:
             for movie_id, cluster_key in results:
                 f.write(str(movie_id) + "," + str(cluster_key) + "\n")
-        print("Total duration(s): {:.3f}".format(time.time()-export_tm))
+        print("Export duration(s): {:.3f}".format(time.time()-export_tm))
 
     def fit_with_new(self):
         starting_tm = time.time()
@@ -139,7 +148,7 @@ class KMeans(object):
             iteration += 1
         # end of dataset parse
         print("Total Iterations:", iteration, " Chunk Size: ", self.chunk_size)
-        print("Total duration(s): {:.3f}".format(time.time()-starting_tm))
+        print("Fit duration(s): {:.3f}".format(time.time()-starting_tm))
 
     # DEPRECATED: For every chunk parse the dataset of tags in order to collect all the tags for each movie
     def fit_with_tags(self):
@@ -203,7 +212,13 @@ class KMeans(object):
                 chunk_vectors[movie_id] = user_ratings.get_vector(movie_id)
             print("All vector created in: {:.3f}".format(time.time() - loop_tm))
             if iteration == 0:
-                random_clusters_ids = self.get_first_clusters(chunk)
+                rows_id = random.sample(range(self.chunk_size), self.k)
+                random_clusters_ids = [chunk['movieId'][row_id] for row_id in rows_id]
+                # TODO find better k starting clusters
+                self.discard = [
+                    SimpleCluster(i, movie_id, chunk_vectors[movie_id])
+                    for i, (row_id, movie_id) in enumerate(zip(rows_id, random_clusters_ids))
+                ]
             clustering_tm = time.time()
             for movie_id in chunk_vectors:
                 if movie_id in random_clusters_ids:
@@ -222,7 +237,7 @@ class KMeans(object):
             print("chunk ", iteration, " in: {:.3f}".format(time.time() - loop_tm))
             iteration += 1
         print("Total Iterations:", iteration, " Chunk Size: ", self.chunk_size)
-        print("Total duration(s): {:.3f}".format(time.time()-starting_tm))
+        print("Fit duration(s): {:.3f}".format(time.time()-starting_tm))
 
     # d4 = 0.3*d1 + 0.25*d2 + 0.45*d3
     def fit_with_all(self):
@@ -278,16 +293,74 @@ class KMeans(object):
             print("chunk ", iteration, " in: {:.3f}".format(time.time() - loop_tm))
             iteration += 1
         print("Total Iterations:", iteration, " Chunk Size: ", self.chunk_size)
-        print("Total duration(s): {:.3f}".format(time.time() - starting_tm))
+        print("Fit duration(s): {:.3f}".format(time.time() - starting_tm))
 
 
 if __name__ == '__main__':
-    movies_path = os.path.join("..", "ml-25m", "movies.csv")
-    tags_path = os.path.join("..", "ml-25m", "tags.csv")
-    ratings_path = os.path.join("..", "ml-25m", "ratings.csv")
-    new_datafile_path = os.path.join("..", "ml-25m", "new_movies_tag_file.csv")
+    parser = argparse.ArgumentParser(
+        description='Disk Based KMeans. Project 2a Big-Data 2020',
+        epilog='Enjoy the program! :)'
+    )
+    # required arguments
+    parser.add_argument('-k', '--k',  type=int, help='Number of clusters', action='store', required=True)
+    parser.add_argument('-p',
+                        '--path',
+                        type=str,
+                        help="The path for the RECREATED data file. Relative and Absolute are accepted",
+                        action='store',
+                        required=True)
+    parser.add_argument('-d',
+                        '--distance',
+                        type=str,
+                        help='The selected distance function eg: d[1-4]',
+                        action='store',
+                        required=True)
+    # not required arguments
+    parser.add_argument('-c', '--chunk', type=int, help="The size of the chunk")
+    parser.add_argument(
+        '-t',
+        '--threshold',
+        type=float,
+        help="The accepted threshold in order a point to belong in a cluster")
+    parser.add_argument(
+        '-r',
+        '--ratings_path',
+        type=str,
+        help="The path for the ratings file. Required for d3, d4. Relative and Absolute are accepted")
+    args = parser.parse_args()
+    arguments = vars(args)
+    print(arguments)
+    # checking the arguments
+    if arguments['distance'] not in ['d1', 'd2', 'd3', 'd4']:
+        print("Error: not valid distance was given. Use -h for help")
+        exit(1)
+    if arguments['distance'] in ['d3', 'd4'] and arguments['ratings_path'] is None:
+        print("Error: ", arguments['distance'], "needs the path for ratings. Use -h for help")
+        exit(1)
+    if arguments['threshold'] is not None:
+        if arguments['threshold'] > 1:
+            print("Error: Threshold should be less than 1. Use -h for help")
+            exit(1)
+    new_datafile_path = arguments['path']
+    ratings_path = arguments['ratings_path']
+    k = arguments['k']
+    d = arguments['distance']
+    t = arguments['threshold'] if arguments['threshold'] is not None else 0.6
+    chunk = arguments['chunk'] if arguments['chunk'] is not None else 5000
+    print("datafile: ", new_datafile_path)
+    print("ratings_path: ", ratings_path)
+    print("k: ", k)
+    print("d: ", d)
+    print("t: ", t)
+    print("chunk: ", chunk)
+    totel_tm = time.time()
 
-    kmean = KMeans(new_datafile_path, k=15, threshold=0.4, chunk_size=10000, distance_f="d4", ratings_path=ratings_path)
+    # movies_path = os.path.join("..", "ml-25m", "movies.csv")
+    # ratings_path = os.path.join("..", "ml-25m", "ratings.csv")
+    # new_datafile_path = os.path.join("..", "ml-25m", "new_movies_tag_file.csv")
+    # kmean = KMeans(new_datafile_path, k=15, threshold=0.4, chunk_size=5000, distance_f="d3", ratings_path=ratings_path)
+    kmean = KMeans(new_datafile_path, k=k, threshold=t, chunk_size=chunk, distance_f=d, ratings_path=ratings_path)
+
     kmean.fit()
     kmean.absorb()
     kmean.details()

@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="680828c2-c936-4539-a5c6-3d297fd3360b" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/disk_based_kmeans/cluster.py" beforeDir="false" afterPath="$PROJECT_DIR$/disk_based_kmeans/cluster.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/disk_based_kmeans/kmeans.py" beforeDir="false" afterPath="$PROJECT_DIR$/disk_based_kmeans/kmeans.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/disk_based_kmeans/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/disk_based_kmeans/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/statistics.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/statistics.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -37,6 +36,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -133,7 +133,15 @@
       <workItem from="1588519253019" duration="3069000" />
       <workItem from="1589561397695" duration="6686000" />
       <workItem from="1589623721769" duration="19548000" />
-      <workItem from="1589656241021" duration="1851000" />
+      <workItem from="1589656241021" duration="2982000" />
+      <workItem from="1589712809348" duration="13656000" />
+      <workItem from="1589735023757" duration="742000" />
+      <workItem from="1590135351072" duration="5529000" />
+      <workItem from="1590141877147" duration="4860000" />
+      <workItem from="1590148246600" duration="4229000" />
+      <workItem from="1590156160167" duration="18697000" />
+      <workItem from="1590224323298" duration="28650000" />
+      <workItem from="1590310889271" duration="7297000" />
     </task>
     <servers />
   </component>
@@ -157,46 +165,46 @@
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
     <state x="770" y="310" width="424" height="491" key="FileChooserDialogImpl/54.25.1866.1055@54.25.1866.1055" timestamp="1588357992030" />
-    <state width="1824" height="277" key="GridCell.Tab.0.bottom" timestamp="1589657415660">
+    <state width="1824" height="197" key="GridCell.Tab.0.bottom" timestamp="1590324709134">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state width="1824" height="277" key="GridCell.Tab.0.bottom/54.25.1866.1055@54.25.1866.1055" timestamp="1589657415660" />
-    <state width="1824" height="277" key="GridCell.Tab.0.center" timestamp="1589657415659">
+    <state width="1824" height="197" key="GridCell.Tab.0.bottom/54.25.1866.1055@54.25.1866.1055" timestamp="1590324709134" />
+    <state width="1824" height="197" key="GridCell.Tab.0.center" timestamp="1590324709133">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state width="1824" height="277" key="GridCell.Tab.0.center/54.25.1866.1055@54.25.1866.1055" timestamp="1589657415659" />
-    <state width="1824" height="277" key="GridCell.Tab.0.left" timestamp="1589657415658">
+    <state width="1824" height="197" key="GridCell.Tab.0.center/54.25.1866.1055@54.25.1866.1055" timestamp="1590324709133" />
+    <state width="1824" height="197" key="GridCell.Tab.0.left" timestamp="1590324709132">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state width="1824" height="277" key="GridCell.Tab.0.left/54.25.1866.1055@54.25.1866.1055" timestamp="1589657415658" />
-    <state width="1824" height="277" key="GridCell.Tab.0.right" timestamp="1589657415659">
+    <state width="1824" height="197" key="GridCell.Tab.0.left/54.25.1866.1055@54.25.1866.1055" timestamp="1590324709132" />
+    <state width="1824" height="197" key="GridCell.Tab.0.right" timestamp="1590324709134">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state width="1824" height="277" key="GridCell.Tab.0.right/54.25.1866.1055@54.25.1866.1055" timestamp="1589657415659" />
-    <state width="1824" height="342" key="GridCell.Tab.1.bottom" timestamp="1587926740672">
+    <state width="1824" height="197" key="GridCell.Tab.0.right/54.25.1866.1055@54.25.1866.1055" timestamp="1590324709133" />
+    <state width="1824" height="342" key="GridCell.Tab.1.bottom" timestamp="1590248506080">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state width="1824" height="342" key="GridCell.Tab.1.bottom/54.25.1866.1055@54.25.1866.1055" timestamp="1587926740672" />
-    <state width="1824" height="342" key="GridCell.Tab.1.center" timestamp="1587926740672">
+    <state width="1824" height="342" key="GridCell.Tab.1.bottom/54.25.1866.1055@54.25.1866.1055" timestamp="1590248506080" />
+    <state width="1824" height="342" key="GridCell.Tab.1.center" timestamp="1590248506079">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state width="1824" height="342" key="GridCell.Tab.1.center/54.25.1866.1055@54.25.1866.1055" timestamp="1587926740672" />
-    <state width="1824" height="342" key="GridCell.Tab.1.left" timestamp="1587926740672">
+    <state width="1824" height="342" key="GridCell.Tab.1.center/54.25.1866.1055@54.25.1866.1055" timestamp="1590248506079" />
+    <state width="1824" height="342" key="GridCell.Tab.1.left" timestamp="1590248506078">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state width="1824" height="342" key="GridCell.Tab.1.left/54.25.1866.1055@54.25.1866.1055" timestamp="1587926740672" />
-    <state width="1824" height="342" key="GridCell.Tab.1.right" timestamp="1587926740672">
+    <state width="1824" height="342" key="GridCell.Tab.1.left/54.25.1866.1055@54.25.1866.1055" timestamp="1590248506078" />
+    <state width="1824" height="342" key="GridCell.Tab.1.right" timestamp="1590248506079">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state width="1824" height="342" key="GridCell.Tab.1.right/54.25.1866.1055@54.25.1866.1055" timestamp="1587926740672" />
+    <state width="1824" height="342" key="GridCell.Tab.1.right/54.25.1866.1055@54.25.1866.1055" timestamp="1590248506079" />
     <state x="491" y="187" width="992" height="737" key="SettingsEditor" timestamp="1587914856891">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
     <state x="491" y="187" width="992" height="737" key="SettingsEditor/54.25.1866.1055@54.25.1866.1055" timestamp="1587914856891" />
-    <state x="670" y="380" key="com.intellij.ide.util.TipDialog" timestamp="1589657007061">
+    <state x="670" y="380" key="com.intellij.ide.util.TipDialog" timestamp="1590310888638">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state x="670" y="380" key="com.intellij.ide.util.TipDialog/54.25.1866.1055@54.25.1866.1055" timestamp="1589657007061" />
+    <state x="670" y="380" key="com.intellij.ide.util.TipDialog/54.25.1866.1055@54.25.1866.1055" timestamp="1590310888638" />
     <state x="640" y="170" width="683" height="771" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1589645000163">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
@@ -206,8 +214,19 @@
     </state>
     <state x="650" y="257" width="672" height="678" key="search.everywhere.popup/54.25.1866.1055@54.25.1866.1055" timestamp="1588354788646" />
   </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/project2$kmeans.coverage" NAME="kmeans Coverage Results" MODIFIED="1589654059924" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/disk_based_kmeans" />
+    <SUITE FILE_PATH="coverage/project2$kmeans.coverage" NAME="kmeans Coverage Results" MODIFIED="1590324706566" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/disk_based_kmeans" />
     <SUITE FILE_PATH="coverage/project2$disk_based_kmeans.coverage" NAME="disk_based_kmeans Coverage Results" MODIFIED="1588353713338" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/disk_based_kmeans" />
     <SUITE FILE_PATH="coverage/project2$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1589625973219" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/disk_based_kmeans" />
   </component>
