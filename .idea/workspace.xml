@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="680828c2-c936-4539-a5c6-3d297fd3360b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/statistics.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/statistics.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cf_test.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/cf_test.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -146,7 +146,9 @@
       <workItem from="1590669825068" duration="5526000" />
       <workItem from="1590682237630" duration="4992000" />
       <workItem from="1590752005157" duration="9962000" />
-      <workItem from="1590767795532" duration="1779000" />
+      <workItem from="1590767795532" duration="6546000" />
+      <workItem from="1590837389156" duration="5109000" />
+      <workItem from="1590842595528" duration="8890000" />
     </task>
     <servers />
   </component>
@@ -210,15 +212,15 @@
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
     <state x="491" y="187" width="992" height="737" key="SettingsEditor/54.25.1866.1055@54.25.1866.1055" timestamp="1587914856891" />
-    <state x="670" y="380" key="com.intellij.ide.util.TipDialog" timestamp="1590767795726">
+    <state x="670" y="380" key="com.intellij.ide.util.TipDialog" timestamp="1590842745812">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state x="670" y="380" key="com.intellij.ide.util.TipDialog/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1590767795726" />
+    <state x="670" y="380" key="com.intellij.ide.util.TipDialog/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1590842745812" />
     <state x="670" y="380" key="com.intellij.ide.util.TipDialog/54.25.1866.1055@54.25.1866.1055" timestamp="1590682239855" />
-    <state x="640" y="170" width="683" height="771" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1590760274083">
+    <state x="640" y="170" width="480" height="771" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1590839077543">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state x="640" y="170" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1590760274083" />
+    <state x="640" y="170" width="480" height="771" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1590839077543" />
     <state x="640" y="170" width="683" height="771" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/54.25.1866.1055@54.25.1866.1055" timestamp="1589645000163" />
     <state x="650" y="257" width="672" height="678" key="search.everywhere.popup" timestamp="1588354788646">
       <screen x="54" y="25" width="1866" height="1055" />
