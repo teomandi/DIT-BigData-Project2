@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="680828c2-c936-4539-a5c6-3d297fd3360b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cf_test.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/cf_test.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/disk_based_kmeans/kmeans.py" beforeDir="false" afterPath="$PROJECT_DIR$/disk_based_kmeans/kmeans.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -148,7 +148,7 @@
       <workItem from="1590752005157" duration="9962000" />
       <workItem from="1590767795532" duration="6546000" />
       <workItem from="1590837389156" duration="5109000" />
-      <workItem from="1590842595528" duration="8890000" />
+      <workItem from="1590842595528" duration="10497000" />
     </task>
     <servers />
   </component>

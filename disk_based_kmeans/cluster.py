@@ -16,7 +16,7 @@ class SimpleCluster(object):
     def add_temp_point(self, idx, content):
         self.temp.append((idx, content))
 
-    def consume(self, is_list=False, f="jaccard"):
+    def consume(self, f="jaccard"):
         if len(self.temp) == 0:
             return
         starting_tm = time.time()
@@ -33,7 +33,7 @@ class SimpleCluster(object):
             sum = _dist
             for p2 in self.temp:
                 if f =="jaccard":
-                    sum += get_jaccard(p1[1], p2[1], is_list)
+                    sum += get_jaccard(p1[1], p2[1])
                 else:
                     sum += cosine_similarity(p1[1], p2[1])[0][0]
             sum_dists.append(sum)
@@ -48,7 +48,6 @@ class SimpleCluster(object):
         print(
             "Consuming took {:.3f}".format(time.time()-starting_tm),
             ":: Key ~>", self.key,
-            # "CLRD ~>", self.clusteroid,
             "membership ", len(self.membership)
         )
 

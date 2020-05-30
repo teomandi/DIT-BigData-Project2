@@ -1,31 +1,27 @@
 import time
 import csv
-import os
 import pandas as pd
 import numpy as np
 from scipy import sparse
 
 
-def file_len(fname):
-    start = time.time()
-    with open(fname) as f:
-        for i, l in enumerate(f):
-            pass
-    print("Count: ", str(i+1), " lines in ", (time.time()-start))
-    return i + 1
-
-
-def get_jaccard(str1, str2, is_list=False, delimiter="|"):
+def get_jaccard(str1, str2, delimiter="|"):
     # print("JC: ", str1, "---", str2)
-    if not is_list:
-        str1 = str(str1).split(delimiter)
-        str2 = str(str2).split(delimiter)
+    str1 = str(str1).split(delimiter)
+    str2 = str(str2).split(delimiter)
     a = set(str1)
     b = set(str2)
     c = a.intersection(b)
     return float(len(c)) / (len(a) + len(b) - len(c))
 
 
+"""
+    Hierarchical Clusterer: Gets a dataset with remaining points, and in
+    each loop trys to find the pair with the minimum distance. Then, merges
+    the pair into one new point (keeping its metadata) and goes on. The process 
+    stops only when there is no other pair to merge that it does not satisfies
+    the minimum distance threshold. 
+"""
 def hierarchical_cluster(remained, threshold):
     print("hierarchical started:: ", len(remained))
     starting_tm = time.time()
@@ -52,6 +48,10 @@ def hierarchical_cluster(remained, threshold):
     return remained
 
 
+"""
+    DEPRECATED
+    It takes the id from a chunk and returns the vectors with the ratings
+"""
 def get_rating_vectors(chunk_ids, ratings_path):
     chunk_vector = {}
     # initialize the vectors
@@ -77,6 +77,11 @@ def get_rating_vectors(chunk_ids, ratings_path):
     print("parsing time: {:.3f}".format(time.time() - parse_tm))
 
 
+"""
+    Creates the new dataset file, which is just like the original
+    movie's file but with the tags column also with the same format
+    just like genres.
+"""
 def recreate_file(
         tags_path="../ml-25m/tags.csv",
         movies_path="../ml-25m/movies.csv",
@@ -198,33 +203,3 @@ class MoviesRatings(object):
             for user_id in self.movies_info[movie_id]:
                 vector[user_id-1] = self.movies_info[movie_id][user_id]
         return sparse.csr_matrix(vector)
-
-# def rating_vector():
-#     print("getting ratings vector")
-#     movies_file_path = os.path.join("..", "ml-25m", "movies.csv")
-#     ratings_file_path = os.path.join("..", "ml-25m", "ratings.csv")
-#     starting_tm = time.time()
-#     i = 0
-#     for chunk in pd.read_csv(movies_file_path, chunksize=4000):
-#         chunk_time = time.time()
-#         chunk_data = {}
-#         chunk_ids = chunk['movieId'].tolist()
-#         init_tm = time.time()
-#         for idd in chunk_ids:
-#             chunk_data[idd] = np.zeros(162541)
-#         print("init in: {:.3f}".format(time.time() - init_tm))
-#         with open(ratings_file_path) as f:
-#             reader = csv.reader(f)
-#             for row in reader:
-#                 try:  # for the first row
-#                     user_id = int(row[0])
-#                     movie_id = int(row[1])
-#                     rating = float(row[2])
-#                 except:
-#                     continue
-#             if movie_id in chunk_ids:
-#                 chunk_data[movie_id][user_id-1] = rating
-#         print("chunk ", i, " in: {:.3f}".format(time.time() - chunk_time))
-#         # break
-#         i += 1
-#     print("Total process complete in: {:.3f}".format(time.time() - starting_tm))

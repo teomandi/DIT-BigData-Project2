@@ -22,7 +22,6 @@ class KMeans(object):
         self.chunk_size = chunk_size
         self.discard = []  # list with clusters
         self.remaining = []  # list of RemainEntity((index, record)) (mostly created for hierarchical_cluster)
-        self.is_list = False
         self.distance_f = distance_f
         self.absorb = self.simple_absorb
         self.details = self.simple_details
@@ -46,20 +45,9 @@ class KMeans(object):
                 exit(1)
             self.ratings_path = ratings_path
             self.details = self.complex_details
-
         else:
             print("Error: Unknown distance function was given")
             exit(1)
-
-    def get_first_clusters(self, chunk):
-        rows_id = random.sample(range(self.chunk_size), self.k)
-        random_clusters_ids = [chunk['movieId'][row_id] for row_id in rows_id]
-        # TODO find better k starting clusters
-        self.discard = [
-            SimpleCluster(i, movie_id, chunk[self.target][row_id])
-            for i, (row_id, movie_id) in enumerate(zip(rows_id, random_clusters_ids))
-        ]
-        return random_clusters_ids
 
     # adds the remains to the closest created cluster and exports the results
     def simple_absorb(self):
@@ -69,7 +57,7 @@ class KMeans(object):
             dist = []
             for cluster in self.discard:
                 if self.distance_f != "d3":
-                    dist.append(get_jaccard(remain.clusteroid, cluster.clusteroid, is_list=self.is_list))
+                    dist.append(get_jaccard(remain.clusteroid, cluster.clusteroid))
                 else:
                     dist.append(cosine_similarity(remain.clusteroid, cluster.clusteroid)[0][0])
             self.discard[dist.index(max(dist))].membership.extend([x[0] for x in remain.members])
@@ -103,6 +91,16 @@ class KMeans(object):
             total += len(disc.membership)
         print("Total Points: ", total)
 
+    def print_results(self):
+        results = []
+        for disc in self.discard:
+            for member in disc.membership:
+                results.append((member, disc.key))
+        results = sorted(results, key=lambda tup: tup[0])
+        print("MovieId, ClusterKey")
+        for movie_id, cluster_key in results:
+            print(movie_id, ",", cluster_key)
+
     def export(self):
         results = []
         output_name = self.distance_f + "_results.csv"
@@ -125,7 +123,12 @@ class KMeans(object):
             loop_tm = time.time()
             # If it is the first time, initialize the first k clusters
             if iteration == 0:
-                random_clusters_ids = self.get_first_clusters(chunk)
+                rows_id = random.sample(range(self.chunk_size), self.k)
+                random_clusters_ids = [chunk['movieId'][row_id] for row_id in rows_id]
+                self.discard = [
+                    SimpleCluster(i, movie_id, chunk[self.target][row_id])
+                    for i, (row_id, movie_id) in enumerate(zip(rows_id, random_clusters_ids))
+                ]
             for movie_id, record in zip(chunk['movieId'], chunk[self.target]):
                 if movie_id in random_clusters_ids:
                     continue
@@ -150,62 +153,11 @@ class KMeans(object):
         print("Total Iterations:", iteration, " Chunk Size: ", self.chunk_size)
         print("Fit duration(s): {:.3f}".format(time.time()-starting_tm))
 
-    # DEPRECATED: For every chunk parse the dataset of tags in order to collect all the tags for each movie
-    def fit_with_tags(self):
-        starting_tm = time.time()
-        random_clusters_ids = []
-        iteration = 0
-        for chunk in pd.read_csv(self.data_path, chunksize=self.chunk_size):
-            chunk_data = {}  # movie_id : [tags]
-            chunk_ids = chunk['movieId'].tolist()
-            # get the data for the current chunk
-            cr_ch_tm = time.time()
-            print("Parsing chunk:: ", iteration)
-            with open(self.tags_path) as f:
-                reader = csv.reader(f)
-                for row in reader:
-                    try:
-                        if int(row[1]) in chunk_ids:
-                            if int(row[1]) not in chunk_data:
-                                chunk_data[int(row[1])] = [row[2]]
-                            else:
-                                chunk_data[int(row[1])].append(row[2])
-                    except:
-                        continue
-            print("Chunk-data created in: {:.3f}".format(time.time()-cr_ch_tm))
-            # initialize
-            if iteration == 0:
-                random_clusters_ids = [chunk['movieId'][i] for i in random.sample(list(chunk_data), self.k)]
-                self.discard = [SimpleCluster(i, index, chunk_data[index], is_list=True) for i, index in
-                                enumerate(random_clusters_ids)]
-            for movie_id in chunk_data:
-                if movie_id in random_clusters_ids:
-                    continue
-                for tag in chunk_data[movie_id]:
-                    dists = []
-                    for cluster in self.discard:
-                        dists.append(get_jaccard(cluster.clusteroid, tag, is_list=True))
-                    # if it is over than threshold add it to DC
-                    if max(dists) >= self.threshold:
-                        self.discard[dists.index(max(dists))].add_temp_point(movie_id, tag)
-                    else:
-                        # add it to retained set
-                        self.remaining.append(RemainEntity((movie_id, tag), is_list=True))  # <--
-            # calculate the new clusteroids in the discard set
-            for c in self.discard:
-                c.consume(is_list=True)
-            iteration += 1
-        # end of dataset parse
-        print("Iterations:", iteration)
-        print("Took {:.3f}".format(time.time() - starting_tm))
-
     def fit_with_ratings(self):
         starting_tm = time.time()
         random_clusters_ids = []
         iteration = 0
-        # user_ratings = UsersRatings(self.ratings_path)
         user_ratings = MoviesRatings(self.ratings_path)
-
         for chunk in pd.read_csv(self.data_path, chunksize=self.chunk_size):
             loop_tm = time.time()
             chunk_ids = chunk['movieId'].tolist()
@@ -216,7 +168,6 @@ class KMeans(object):
             if iteration == 0:
                 rows_id = random.sample(range(self.chunk_size), self.k)
                 random_clusters_ids = [chunk['movieId'][row_id] for row_id in rows_id]
-                # TODO find better k starting clusters
                 self.discard = [
                     SimpleCluster(i, movie_id, chunk_vectors[movie_id])
                     for i, (row_id, movie_id) in enumerate(zip(rows_id, random_clusters_ids))
@@ -258,7 +209,6 @@ class KMeans(object):
             if iteration == 0:
                 rows_id = random.sample(range(self.chunk_size), self.k)
                 random_clusters_ids = [chunk['movieId'][row_id] for row_id in rows_id]
-                # TODO find better k starting clusters
                 self.discard = [
                     ComplexCluster(
                         i,
@@ -300,9 +250,6 @@ class KMeans(object):
 
 
 if __name__ == '__main__':
-    # recreate_file()
-    # exit()
-
     parser = argparse.ArgumentParser(
         description='Disk Based KMeans. Project 2a Big-Data 2020',
         epilog='Enjoy the program! :)'
@@ -321,7 +268,7 @@ if __name__ == '__main__':
                         help='The selected distance function eg: d[1-4]',
                         action='store',
                         required=True)
-    # not required arguments
+    # optional arguments
     parser.add_argument('-c', '--chunk', type=int, help="The size of the chunk")
     parser.add_argument(
         '-t',
@@ -364,7 +311,6 @@ if __name__ == '__main__':
     # movies_path = os.path.join("..", "ml-25m", "movies.csv")
     # ratings_path = os.path.join("..", "ml-25m", "ratings.csv")
     # new_datafile_path = os.path.join("..", "ml-25m", "new_movies_tag_file.csv")
-    # kmean = KMeans(new_datafile_path, k=15, threshold=0.4, chunk_size=5000, distance_f="d3", ratings_path=ratings_path)
     kmean = KMeans(new_datafile_path, k=k, threshold=t, chunk_size=chunk, distance_f=d, ratings_path=ratings_path)
 
     kmean.fit()
