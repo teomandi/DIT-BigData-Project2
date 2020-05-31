@@ -18,7 +18,7 @@ def pickle_load(filename):
 
 
 class CollaborativeFiltering(object):
-    def __init__(self, ratings_file_path=None, pivot_table_path=None, load=False, store=False):
+    def __init__(self, method="user", ratings_file_path=None, pivot_table_path=None, load=False, store=False):
         if ratings_file_path is None:
             print("Error: Path for Ratings is not given")
             exit(1)
@@ -38,6 +38,10 @@ class CollaborativeFiltering(object):
                     pickle_store(self.pivot_table, pivot_table_path)
                 else:
                     print("Warning: Could not store pivot table without path")
+        if method == "user":
+            self.predict = self.user_based_prediction
+        elif method == "item":
+            self.predict = self.item_based_prediction
 
     def collect_movies_and_users(self):
         print("Collecting movies and users ids starts")
@@ -70,7 +74,7 @@ class CollaborativeFiltering(object):
         print("Creating pivot_table took: {:.3f}".format(time.time() - headers_tm))
         return pivot_table
 
-    def predict(self, target_user_id):
+    def user_based_prediction(self, target_user_id):
         print("Prediction process for user: <", target_user_id, "> started")
         if target_user_id > len(self.users_ids)-1:
             print("Warning: User not exist on dataset")
@@ -105,6 +109,8 @@ class CollaborativeFiltering(object):
         predictions = [int(self.movies_ids[idx]) for idx in best_movies_indexes]
         print(predictions)
 
+    def item_based_prediction(self, target_user_id):
+        pass
 
 if __name__ == '__main__':
     ratings_path = os.path.join("..", "ml-25m", "ratings.csv")
@@ -128,5 +134,5 @@ if __name__ == '__main__':
                 break
             print("Invalid value..")
             continue
-        cf.predict(int(uid))
+        cf.predict(uid)
     print("bye")
