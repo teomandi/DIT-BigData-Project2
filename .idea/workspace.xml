@@ -10,6 +10,9 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FavoritesManager">
+    <favorites_list name="project2" />
+  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
@@ -172,7 +175,7 @@
       <workItem from="1590767795532" duration="6546000" />
       <workItem from="1590837389156" duration="5109000" />
       <workItem from="1590842595528" duration="12406000" />
-      <workItem from="1590914557505" duration="8971000" />
+      <workItem from="1590914557505" duration="10404000" />
     </task>
     <servers />
   </component>
@@ -197,25 +200,25 @@
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
     <state x="770" y="310" width="424" height="491" key="FileChooserDialogImpl/54.25.1866.1055@54.25.1866.1055" timestamp="1588357992030" />
-    <state width="1824" height="227" key="GridCell.Tab.0.bottom" timestamp="1590938994262">
+    <state width="1824" height="227" key="GridCell.Tab.0.bottom" timestamp="1590942007586">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state width="1824" height="227" key="GridCell.Tab.0.bottom/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1590938994262" />
+    <state width="1824" height="227" key="GridCell.Tab.0.bottom/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1590942007586" />
     <state width="1824" height="93" key="GridCell.Tab.0.bottom/54.25.1866.1055@54.25.1866.1055" timestamp="1590682364131" />
-    <state width="1824" height="227" key="GridCell.Tab.0.center" timestamp="1590938994262">
+    <state width="1824" height="227" key="GridCell.Tab.0.center" timestamp="1590942007586">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state width="1824" height="227" key="GridCell.Tab.0.center/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1590938994262" />
+    <state width="1824" height="227" key="GridCell.Tab.0.center/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1590942007586" />
     <state width="1824" height="93" key="GridCell.Tab.0.center/54.25.1866.1055@54.25.1866.1055" timestamp="1590682364130" />
-    <state width="1824" height="227" key="GridCell.Tab.0.left" timestamp="1590938994262">
+    <state width="1824" height="227" key="GridCell.Tab.0.left" timestamp="1590942007586">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state width="1824" height="227" key="GridCell.Tab.0.left/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1590938994262" />
+    <state width="1824" height="227" key="GridCell.Tab.0.left/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1590942007586" />
     <state width="1824" height="93" key="GridCell.Tab.0.left/54.25.1866.1055@54.25.1866.1055" timestamp="1590682364130" />
-    <state width="1824" height="227" key="GridCell.Tab.0.right" timestamp="1590938994262">
+    <state width="1824" height="227" key="GridCell.Tab.0.right" timestamp="1590942007586">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
-    <state width="1824" height="227" key="GridCell.Tab.0.right/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1590938994262" />
+    <state width="1824" height="227" key="GridCell.Tab.0.right/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1590942007586" />
     <state width="1824" height="93" key="GridCell.Tab.0.right/54.25.1866.1055@54.25.1866.1055" timestamp="1590682364130" />
     <state width="1824" height="342" key="GridCell.Tab.1.bottom" timestamp="1590248506080">
       <screen x="54" y="25" width="1866" height="1055" />

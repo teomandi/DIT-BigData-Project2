@@ -96,7 +96,11 @@ class CollaborativeFiltering(object):
         movie_avg_ratings = []
         for movie in movies_under_consideration:
             movie_ratings = self.pivot_table[most_similar_users, movie].toarray().squeeze().tolist()
-            movie_avg_ratings.append(sum(movie_ratings) / len(movie_ratings))
+            # movie_avg_ratings.append(sum(movie_ratings) / len(movie_ratings))  # option 1
+            movie_avg_ratings.append(
+                sum([r*user_similarities[sid][0] for r, sid in zip(movie_ratings, most_similar_users)])
+                / sum([user_similarities[sid][0] for sid in most_similar_users]))  # option 2
+
         best_movies_indexes = np.array(movie_avg_ratings).argsort()[:20].tolist()
         predictions = [int(self.movies_ids[idx]) for idx in best_movies_indexes]
         print(predictions)
@@ -111,7 +115,8 @@ if __name__ == '__main__':
     cf = CollaborativeFiltering(
         ratings_path,
         pivot_table_path=fixed_pivot_table_path,
-        store=True
+        store=False,
+        load=True
     )
 
     while True:
