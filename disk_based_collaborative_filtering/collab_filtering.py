@@ -75,7 +75,7 @@ class CollaborativeFiltering(object):
         return pivot_table
 
     def user_based_prediction(self, target_user_id):
-        print("Prediction process for user: <", target_user_id, "> started")
+        print("User-Based Prediction process for user: <", target_user_id, "> started")
         if target_user_id > len(self.users_ids)-1:
             print("Warning: User not exist on dataset")
             return
@@ -95,22 +95,23 @@ class CollaborativeFiltering(object):
         # get the movies the target has seen
         movies_seen_by_target_user = self.pivot_table.getrow(target_user_id - 1).nonzero()[1]
         # movies that user has not seen but similar user has
-        movies_under_consideration = list(set(movies_seen_by_similar_users) - set(movies_seen_by_target_user))
+        movies_under_consideration = list(movies_seen_by_similar_users - set(movies_seen_by_target_user))
         # for each movie get the avg and predict the best one
         movie_avg_ratings = []
+        print("under cons movies are ", len(movies_under_consideration))
         for movie in movies_under_consideration:
             movie_ratings = self.pivot_table[most_similar_users, movie].toarray().squeeze().tolist()
             # movie_avg_ratings.append(sum(movie_ratings) / len(movie_ratings))  # option 1
             movie_avg_ratings.append(
                 sum([r*user_similarities[sid][0] for r, sid in zip(movie_ratings, most_similar_users)])
                 / sum([user_similarities[sid][0] for sid in most_similar_users]))  # option 2
-
-        best_movies_indexes = np.array(movie_avg_ratings).argsort()[:20].tolist()
-        predictions = [int(self.movies_ids[idx]) for idx in best_movies_indexes]
-        print(predictions)
+        best_movies_indexes = (-np.array(movie_avg_ratings)).argsort()[:20].tolist()
+        predictions = [(movies_under_consideration[idx], movie_avg_ratings[idx]) for idx in best_movies_indexes[:20]]
+        return predictions
 
     def item_based_prediction(self, target_user_id):
         pass
+
 
 if __name__ == '__main__':
     ratings_path = os.path.join("..", "ml-25m", "ratings.csv")
@@ -119,7 +120,8 @@ if __name__ == '__main__':
 
     # cf = CollaborativeFiltering(ratings_path, pivot_table_path=pivot_table_path, load=True)
     cf = CollaborativeFiltering(
-        ratings_path,
+        method="user",
+        ratings_file_path=ratings_path,
         pivot_table_path=fixed_pivot_table_path,
         store=False,
         load=True
@@ -134,5 +136,7 @@ if __name__ == '__main__':
                 break
             print("Invalid value..")
             continue
-        cf.predict(uid)
+        results = cf.predict(uid)
+        for movie_id, rating in results:
+            print(int(cf.movies_ids[movie_id]), rating)
     print("bye")
