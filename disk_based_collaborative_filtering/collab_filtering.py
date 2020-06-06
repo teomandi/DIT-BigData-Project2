@@ -75,6 +75,7 @@ class CollaborativeFiltering(object):
         return pivot_table
 
     def user_based_prediction(self, target_user_id):
+        prediction_tm = time.time()
         print("User-Based Prediction process for user: <", target_user_id, "> started")
         if target_user_id > len(self.users_ids)-1:
             print("Warning: User not exist on dataset")
@@ -106,11 +107,78 @@ class CollaborativeFiltering(object):
                 sum([r*user_similarities[sid][0] for r, sid in zip(movie_ratings, most_similar_users)])
                 / sum([user_similarities[sid][0] for sid in most_similar_users]))  # option 2
         best_movies_indexes = (-np.array(movie_avg_ratings)).argsort()[:20].tolist()
-        predictions = [(movies_under_consideration[idx], movie_avg_ratings[idx]) for idx in best_movies_indexes[:20]]
+        predictions = [(int(self.movies_ids[movies_under_consideration[idx]]), movie_avg_ratings[idx]) for idx in best_movies_indexes[:20]]
+        print("User-Based Prediction took {:.3f}".format(time.time() - prediction_tm))
         return predictions
 
     def item_based_prediction(self, target_user_id):
-        pass
+        prediction_tm = time.time()
+        print("Item-Based Prediction process for user: <", target_user_id, "> started")
+        if target_user_id > len(self.users_ids) - 1:
+            print("Warning: User not exist on dataset")
+            return
+        movies_seen_by_target_user = self.pivot_table.getrow(target_user_id - 1).nonzero()[1].tolist()
+        movies_seen_by_target_user.sort(key=lambda x: self.pivot_table[target_user_id - 1, x], reverse=True)
+        movies_rate_predictions = []
+        already_checked_movies = []
+        should_stop = False
+        print("User has seen ", len(movies_seen_by_target_user), "movies")
+        if len(movies_seen_by_target_user) == 0:
+            print("User has not see any movies!")
+            return []
+        while not should_stop:
+            for movie in movies_seen_by_target_user:
+                similarity_movies = cosine_similarity(
+                    self.pivot_table.transpose(),
+                    self.pivot_table.getcol(movie).transpose()
+                )
+                k = 0
+                move_on = False
+                sorted_similar_movies = (-similarity_movies).argsort(axis=0)
+                while True:
+                    most_similar_movie_id = sorted_similar_movies[k][0]
+                    if most_similar_movie_id in already_checked_movies or\
+                            most_similar_movie_id in movies_seen_by_target_user:
+                        if k >= similarity_movies.shape[0]:
+                            move_on = True
+                            break
+                        k += 1
+                        continue
+                    else:
+                        already_checked_movies.append(most_similar_movie_id)
+                        break
+                if move_on:
+                    continue
+                movies_rate_predictions.append(
+                    (most_similar_movie_id, self.predict_rating_for_movie(
+                        most_similar_movie_id,
+                        target_user_id,
+                        movies_seen_by_target_user
+                    ))
+                )
+                if len(movies_rate_predictions) == 20:
+                    should_stop = True
+                    break
+                if len(movies_rate_predictions) % 2 == 0:
+                    print((len(movies_rate_predictions)*5), "% process done")
+            print("next cycle")
+        movies_rate_predictions = sorted(movies_rate_predictions, reverse=True, key=lambda tup: tup[1])[:20]
+        predictions = [(int(self.movies_ids[movie_idx]), _rating) for movie_idx, _rating in movies_rate_predictions]
+        print("Item-Based Prediction took {:.3f}".format(time.time() - prediction_tm))
+        return predictions
+
+    def predict_rating_for_movie(self, target_movie_id, target_user_id, movies_seen_by_target_user):
+        similarity_movies = cosine_similarity(
+            self.pivot_table.transpose(),
+            self.pivot_table.getcol(target_movie_id).transpose()
+        )
+        similar_movies = (-similarity_movies).argsort(axis=0)
+        most_similar_movies = (similar_movies[1:]).squeeze().tolist()  # put here the max selected movies
+        accepted_movies = [movie for movie in most_similar_movies if movie in movies_seen_by_target_user]
+        movie_rating = sum(
+            [self.pivot_table[target_user_id - 1, movie] * similarity_movies[movie] for movie in accepted_movies]) /\
+                       sum([similarity_movies[movie] for movie in accepted_movies])
+        return movie_rating[0]
 
 
 if __name__ == '__main__':
@@ -120,7 +188,7 @@ if __name__ == '__main__':
 
     # cf = CollaborativeFiltering(ratings_path, pivot_table_path=pivot_table_path, load=True)
     cf = CollaborativeFiltering(
-        method="user",
+        method="item",
         ratings_file_path=ratings_path,
         pivot_table_path=fixed_pivot_table_path,
         store=False,
@@ -138,5 +206,5 @@ if __name__ == '__main__':
             continue
         results = cf.predict(uid)
         for movie_id, rating in results:
-            print(int(cf.movies_ids[movie_id]), rating)
+            print(movie_id, rating)
     print("bye")
