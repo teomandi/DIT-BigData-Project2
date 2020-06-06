@@ -5,6 +5,7 @@ import time
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.sparse import csr_matrix
 import pickle
+import argparse
 
 
 def pickle_store(obj, filename):
@@ -42,6 +43,12 @@ class CollaborativeFiltering(object):
             self.predict = self.user_based_prediction
         elif method == "item":
             self.predict = self.item_based_prediction
+        elif method == "mix":
+            self.predict = self.mixed_based_prediction
+        else:
+            print("Error: unknown method was given: ", method)
+            print("Accepted methods are only: \'user\', \'item\', \'mix\'")
+            exit(1)
 
     def collect_movies_and_users(self):
         print("Collecting movies and users ids starts")
@@ -63,7 +70,7 @@ class CollaborativeFiltering(object):
         iteration = 0
         headers_tm = time.time()
         pivot_table = csr_matrix((len(self.users_ids), len(self.movies_ids)))
-        for chunk in pd.read_csv(ratings_path, chunksize=100000):
+        for chunk in pd.read_csv(self.ratings_file_path, chunksize=100000):
             rows = [i - 1 for i in chunk['userId'].tolist()]
             cols = [np.where(self.movies_ids == j)[0][0] for j in chunk['movieId']]
             user_ratings = chunk['rating'].tolist()
@@ -73,6 +80,19 @@ class CollaborativeFiltering(object):
             iteration += 1
         print("Creating pivot_table took: {:.3f}".format(time.time() - headers_tm))
         return pivot_table
+
+    def predict_rating_for_movie(self, target_movie_id, target_user_id, movies_seen_by_target_user):
+        similarity_movies = cosine_similarity(
+            self.pivot_table.transpose(),
+            self.pivot_table.getcol(target_movie_id).transpose()
+        )
+        similar_movies = (-similarity_movies).argsort(axis=0)
+        most_similar_movies = (similar_movies[1:]).squeeze().tolist()  # put here the max selected movies
+        accepted_movies = [movie for movie in most_similar_movies if movie in movies_seen_by_target_user]
+        movie_rating = sum(
+            [self.pivot_table[target_user_id - 1, movie] * similarity_movies[movie] for movie in accepted_movies]) /\
+                       sum([similarity_movies[movie] for movie in accepted_movies])
+        return movie_rating[0]
 
     def user_based_prediction(self, target_user_id):
         prediction_tm = time.time()
@@ -107,7 +127,8 @@ class CollaborativeFiltering(object):
                 sum([r*user_similarities[sid][0] for r, sid in zip(movie_ratings, most_similar_users)])
                 / sum([user_similarities[sid][0] for sid in most_similar_users]))  # option 2
         best_movies_indexes = (-np.array(movie_avg_ratings)).argsort()[:20].tolist()
-        predictions = [(int(self.movies_ids[movies_under_consideration[idx]]), movie_avg_ratings[idx]) for idx in best_movies_indexes[:20]]
+        predictions = [(int(self.movies_ids[movies_under_consideration[idx]]), movie_avg_ratings[idx], "u")
+                       for idx in best_movies_indexes[:20]]
         print("User-Based Prediction took {:.3f}".format(time.time() - prediction_tm))
         return predictions
 
@@ -163,48 +184,95 @@ class CollaborativeFiltering(object):
                     print((len(movies_rate_predictions)*5), "% process done")
             print("next cycle")
         movies_rate_predictions = sorted(movies_rate_predictions, reverse=True, key=lambda tup: tup[1])[:20]
-        predictions = [(int(self.movies_ids[movie_idx]), _rating) for movie_idx, _rating in movies_rate_predictions]
+        predictions = [(int(self.movies_ids[movie_idx]), _rating, "i") for movie_idx, _rating in movies_rate_predictions]
         print("Item-Based Prediction took {:.3f}".format(time.time() - prediction_tm))
         return predictions
 
-    def predict_rating_for_movie(self, target_movie_id, target_user_id, movies_seen_by_target_user):
-        similarity_movies = cosine_similarity(
-            self.pivot_table.transpose(),
-            self.pivot_table.getcol(target_movie_id).transpose()
-        )
-        similar_movies = (-similarity_movies).argsort(axis=0)
-        most_similar_movies = (similar_movies[1:]).squeeze().tolist()  # put here the max selected movies
-        accepted_movies = [movie for movie in most_similar_movies if movie in movies_seen_by_target_user]
-        movie_rating = sum(
-            [self.pivot_table[target_user_id - 1, movie] * similarity_movies[movie] for movie in accepted_movies]) /\
-                       sum([similarity_movies[movie] for movie in accepted_movies])
-        return movie_rating[0]
+    def mixed_based_prediction(self, target_user_id):
+        prediction_tm = time.time()
+        print("Mixed-Based Prediction process for user: <", target_user_id, "> started")
+        if target_user_id > len(self.users_ids) - 1:
+            print("Warning: User not exist on dataset")
+            return
+        user_based_predictions = self.user_based_prediction(target_user_id)
+        item_based_predictions = self.item_based_prediction(target_user_id)
+
+        predictions = user_based_predictions + item_based_predictions
+        predictions.sort(key=lambda trup: trup[1], reverse=True)
+        print("Mixed-Based Prediction took {:.3f}".format(time.time() - prediction_tm))
+        return predictions[:20]
 
 
 if __name__ == '__main__':
-    ratings_path = os.path.join("..", "ml-25m", "ratings.csv")
-    pivot_table_path = os.path.join("..", "ml-25m", "pivot_table.sparse")
-    fixed_pivot_table_path = os.path.join("..", "ml-25m", "fixed_pivot_table.sparse")
+
+    parser = argparse.ArgumentParser(
+        description='Disk Based Collaborative Filtering. Project 2b Big-Data 2020',
+        epilog='Enjoy the program! :)'
+    )
+    parser.add_argument(
+        '-m',
+        '--method',
+        type=str,
+        help='Selected method for predicting movies. Accepted Options are \'user\', \'item\', \'mix\'',
+        action='store',
+        required=True)
+    parser.add_argument(
+        '-r',
+        '--ratings_path',
+        type=str,
+        help="The path for the ratings file. Required for d3, d4. Relative and Absolute are accepted",
+        required=True)
+    # optional arguments
+    parser.add_argument(
+        '-p',
+        '--pivot_table_path',
+        type=str,
+        help="The path for the pivot_table file. It will load or store it there according to the other arguments",
+    )
+    parser.add_argument(
+        '-l',
+        '--load',
+        help="If this argument is given, the program will try to load the pivot table from the pivot_table_path",
+        default=False,
+        action='store_true'
+    )
+    parser.add_argument(
+        '-s',
+        '--store',
+        help="If this argument is given, the program will store the generated pivot table to the pivot_table_path",
+        default=False,
+        action='store_true'
+    )
+
+    args = parser.parse_args()
+    arguments = vars(args)
+    print("Given args: ", arguments)
+
+    # ratings_path = os.path.join("..", "ml-25m", "ratings.csv")
+    # pivot_table_path = os.path.join("..", "ml-25m", "fixed_pivot_table.sparse")
 
     # cf = CollaborativeFiltering(ratings_path, pivot_table_path=pivot_table_path, load=True)
     cf = CollaborativeFiltering(
-        method="item",
-        ratings_file_path=ratings_path,
-        pivot_table_path=fixed_pivot_table_path,
-        store=False,
-        load=True
+        method=arguments['method'],
+        ratings_file_path=arguments['ratings_path'],
+        pivot_table_path=arguments['pivot_table_path'],
+        store=arguments['store'],
+        load=arguments['load']
     )
-
-    while True:
-        uid = input("Give user id: ")
-        try:
-            uid = int(uid)
-        except ValueError:
-            if uid == 'q':
-                break
-            print("Invalid value..")
-            continue
-        results = cf.predict(uid)
-        for movie_id, rating in results:
-            print(movie_id, rating)
+    try:
+        while True:
+            uid = input("Give user id: ")
+            try:
+                uid = int(uid)
+            except ValueError:
+                if uid == 'q':
+                    break
+                print("Invalid value..")
+                continue
+            results = cf.predict(uid)
+            print("MOVIE ID, RATING, METHOD")
+            for movie_id, r, m in results:
+                print(movie_id, r, m)
+    except KeyboardInterrupt:
+        pass
     print("bye")

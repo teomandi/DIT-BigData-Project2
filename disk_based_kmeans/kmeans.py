@@ -80,14 +80,19 @@ class KMeans(object):
     def simple_details(self):
         total = 0
         for disc in self.discard:
-            print("# CLRD: -", disc.key, "|", disc.clusteroid, " len:: ", len(disc.membership))
+            print("~> Key: ", disc.key, "|Clusteroid: ", disc.clusteroid, "|Members: ", len(disc.membership))
             total += len(disc.membership)
         print("Total Points: ", total)
 
     def complex_details(self):
         total = 0
         for disc in self.discard:
-            print("# CLRD: -", disc.key, "|", " len:: ", len(disc.membership))
+            print(
+                "~> Key: ", disc.key,
+                "|Clusteroid: Genres: ", disc.clusteroid_genres,
+                "Tag: ", disc.clusteroid_tags,
+                "Ratings: <sparse vector> ",
+                " |Members: ", len(disc.membership))
             total += len(disc.membership)
         print("Total Points: ", total)
 
@@ -280,6 +285,13 @@ if __name__ == '__main__':
         '--ratings_path',
         type=str,
         help="The path for the ratings file. Required for d3, d4. Relative and Absolute are accepted")
+    parser.add_argument(
+        '-e',
+        '--export',
+        help="If this argument is given, the program will export the results as a csv file in the working directory ",
+        default=False,
+        action='store_true'
+    )
     args = parser.parse_args()
     arguments = vars(args)
     print(arguments)
@@ -308,14 +320,14 @@ if __name__ == '__main__':
     print("chunk: ", chunk)
     total_tm = time.time()
 
-    # movies_path = os.path.join("..", "ml-25m", "movies.csv")
-    # ratings_path = os.path.join("..", "ml-25m", "ratings.csv")
-    # new_datafile_path = os.path.join("..", "ml-25m", "new_movies_tag_file.csv")
     kmean = KMeans(new_datafile_path, k=k, threshold=t, chunk_size=chunk, distance_f=d, ratings_path=ratings_path)
 
     kmean.fit()
     kmean.absorb()
     kmean.details()
-    kmean.export()
+    if arguments['export']:
+        kmean.export()
+    else:
+        kmean.print_results()
 
     print("Total duration(s): {:.3f}".format(time.time() - total_tm))

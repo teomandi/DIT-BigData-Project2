@@ -6,6 +6,7 @@ ml-25m/
 *.xml
 *.log
 *.txt
+*.sparse
 __pycache__
 idea/workspace.xml
 
