@@ -2,15 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="680828c2-c936-4539-a5c6-3d297fd3360b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/disk_based_kmeans/create_file.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/disk_based_collaborative_filtering/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/disk_based_collaborative_filtering/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/disk_based_collaborative_filtering/collab_filtering.py" beforeDir="false" afterPath="$PROJECT_DIR$/disk_based_collaborative_filtering/collab_filtering.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/disk_based_kmeans/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/disk_based_kmeans/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/disk_based_kmeans/cluster.py" beforeDir="false" afterPath="$PROJECT_DIR$/disk_based_kmeans/cluster.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/disk_based_kmeans/kmeans.py" beforeDir="false" afterPath="$PROJECT_DIR$/disk_based_kmeans/kmeans.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/disk_based_kmeans/recreate_file.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/disk_based_kmeans/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/disk_based_kmeans/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -190,7 +182,7 @@
       <workItem from="1591434821576" duration="3646000" />
       <workItem from="1591438585183" duration="242000" />
       <workItem from="1591438911923" duration="26905000" />
-      <workItem from="1591519354132" duration="27193000" />
+      <workItem from="1591519354132" duration="28610000" />
     </task>
     <servers />
   </component>

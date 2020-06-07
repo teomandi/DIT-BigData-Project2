@@ -63,3 +63,16 @@ Similarly, if the table is already stored, it can be loaded using the `--load` a
 and storing the program uses the *pickle* module.
 
 The pivot table needs about 10 minutes to be created.
+
+---
+
+# Examples
+
+## user-based
+`python disk_based_collaborative_filtering/collab_filtering.py -m item -r ml-25m/ratings.csv -p lil_pivot_table.sparse --store`
+
+## item-based
+`python disk_based_collaborative_filtering/collab_filtering.py -m item -r ml-25m/ratings.csv -p lil_pivot_table.sparse --load`
+
+## mix
+`python disk_based_collaborative_filtering/collab_filtering.py -m mix -r ml-25m/ratings.csv`  ## will generate the table

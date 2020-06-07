@@ -74,3 +74,20 @@ or like the example below:
 `python create_file.py -m ml-25m/movies.csv -t ml-25m/tags.csv -o ml-25m/new_data_file.csv`
 
 **It takes about 10 seconds for the file to be created.**
+
+---
+
+# Examples
+
+## Create New Data File
+python disk_based_kmeans/create_file.py -t ml-25m/tags.csv -m ml-25m/movies.csv -o new_data_file.csv
+## d1
+python disk_based_kmeans/kmeans.py -k 15 -p new_data_file.csv -d d1 --export
+## d2
+python disk_based_kmeans/kmeans.py -k 15 -p new_data_file.csv -d d2 --export
+## d3
+python disk_based_kmeans/kmeans.py -k 15 -p new_data_file.csv -r ml-25m/ratings.csv -d d3 -t 0.2 -c 5000 --export
+## d4
+python disk_based_kmeans/kmeans.py -k 15 -p new_data_file.csv -r ml-25m/ratings.csv -d d4 -t 0.2 -c 5000 --export
+
+
