@@ -6,7 +6,7 @@ import argparse
 import os
 from sklearn.metrics.pairwise import cosine_similarity
 
-from utils import hierarchical_cluster, get_jaccard, recreate_file, get_rating_vectors, UsersRatings, MoviesRatings
+from utils import hierarchical_cluster, get_jaccard, get_rating_vectors, MoviesRatings
 from cluster import SimpleCluster, ComplexCluster, RemainEntity
 
 
@@ -80,7 +80,10 @@ class KMeans(object):
     def simple_details(self):
         total = 0
         for disc in self.discard:
-            print("~> Key: ", disc.key, "|Clusteroid: ", disc.clusteroid, "|Members: ", len(disc.membership))
+            if self.distance_f == "d3":
+                print("~> Key: ", disc.key, "|Clusteroid: <sparse vector> |Members: ", len(disc.membership))
+            else:
+                print("~> Key: ", disc.key, "|Clusteroid: ", disc.clusteroid, "|Members: ", len(disc.membership))
             total += len(disc.membership)
         print("Total Points: ", total)
 
@@ -186,7 +189,6 @@ class KMeans(object):
                     cs = cosine_similarity(cluster.clusteroid, chunk_vectors[movie_id])[0][0]
                     dists.append(cs)
                 if max(dists) >= self.threshold:
-                    print("hit")
                     self.discard[dists.index(max(dists))].add_temp_point(movie_id, chunk_vectors[movie_id])
                 else:
                     self.remaining.append(RemainEntity((movie_id, chunk_vectors[movie_id])))
@@ -203,7 +205,7 @@ class KMeans(object):
         starting_tm = time.time()
         random_clusters_ids = []
         iteration = 0
-        user_ratings = UsersRatings(self.ratings_path)
+        user_ratings = MoviesRatings(self.ratings_path)
         for chunk in pd.read_csv(self.data_path, chunksize=self.chunk_size):
             loop_tm = time.time()
             chunk_ids = chunk['movieId'].tolist()
@@ -310,8 +312,8 @@ if __name__ == '__main__':
     ratings_path = arguments['ratings_path']
     k = arguments['k']
     d = arguments['distance']
-    t = arguments['threshold'] if arguments['threshold'] is not None else 0.6
-    chunk = arguments['chunk'] if arguments['chunk'] is not None else 5000
+    t = arguments['threshold'] if arguments['threshold'] is not None else 0.4
+    chunk = arguments['chunk'] if arguments['chunk'] is not None else 10000
     print("datafile: ", new_datafile_path)
     print("ratings_path: ", ratings_path)
     print("k: ", k)

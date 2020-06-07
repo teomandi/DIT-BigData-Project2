@@ -1,4 +1,4 @@
-from utils import file_len, get_jaccard
+from utils import get_jaccard
 import time
 
 from sklearn.metrics.pairwise import cosine_similarity
@@ -105,10 +105,9 @@ class ComplexCluster(object):
 
 # created in order to be used in hierarchical_cluster
 class RemainEntity(object):
-    def __init__(self, point1, is_list=False):
+    def __init__(self, point1):
         self.members = [point1]  # points: (idx, content)
         self.clusteroid = point1[1]
-        self.is_list = is_list
 
     # calculates the clusteroid
     def refresh(self):
@@ -116,7 +115,7 @@ class RemainEntity(object):
         for member in self.members:
             sum = 0
             for point in self.members:
-                sum += get_jaccard(member[1], point[1], self.is_list)
+                sum += get_jaccard(member[1], point[1])
             sum_dists.append(sum)
         self.clusteroid = self.members[sum_dists.index(min(sum_dists))][1]
 

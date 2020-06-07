@@ -4,7 +4,7 @@
 - Implemented by:
    - Theodoros Mandilaras
    - cs2.190018
-- DIT/EKPA 2019-2020
+- MSc DIT/EKPA 2019-2020
 
 ---
 
@@ -24,13 +24,13 @@ The programs terminates by giving the 'q' letter for input or with the Ctrl+C sh
 
 ### Arguments
 The required arguments are:
-- -m or --method: It gets which method to use in order to predict. Values can be only: "user", "item" or "mix"
-- -r or --ratings_path: The path where the ratings file is located
+- `-m` or `--method`: It gets which method to use in order to predict. Values can be only: "user", "item" or "mix"
+- `-r` or `--ratings_path`: The path where the ratings file is located
 
 Optional arguments are:
-- -p or --pivot_table_path: The path to store/load the pivot table
-- --load or -l: If this flag exists it will try to load the pivot table from the path
-- --store or -s: If this flag exists it will try to store the pivot table in the given path
+- `-p` or `--pivot_table_path`: The path to store/load the pivot table
+- -`--load` or `-l`: If this flag exists it will try to load the pivot table from the path
+- -`--store` or `-s`: If this flag exists it will try to store the pivot table in the given path
 
 You can check the help menu with the -h argument.
 

@@ -3,7 +3,7 @@ import numpy as np
 import os
 import time
 from sklearn.metrics.pairwise import cosine_similarity
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, lil_matrix, diags
 import pickle
 import argparse
 
@@ -69,16 +69,26 @@ class CollaborativeFiltering(object):
         print("Creating pivot table starts")
         iteration = 0
         headers_tm = time.time()
-        pivot_table = csr_matrix((len(self.users_ids), len(self.movies_ids)))
+        a = csr_matrix((len(self.users_ids), len(self.movies_ids)))
         for chunk in pd.read_csv(self.ratings_file_path, chunksize=100000):
             rows = [i - 1 for i in chunk['userId'].tolist()]
             cols = [np.where(self.movies_ids == j)[0][0] for j in chunk['movieId']]
-            user_ratings = chunk['rating'].tolist()
-            avg_ratings = sum(user_ratings) / len(user_ratings)
-            fixed_ratings = [rate - avg_ratings for rate in user_ratings]
-            pivot_table[rows, cols] = fixed_ratings
+            values = chunk['rating'].tolist()
+            # fixed_ratings = [rat - chunk[chunk['userId'] == u].mean()['rating']
+            #                  for u, rat in zip(chunk['userId'], chunk['rating'])]
+            a[rows, cols] = values
             iteration += 1
         print("Creating pivot_table took: {:.3f}".format(time.time() - headers_tm))
+        headers_tm = time.time()
+        tot = np.array(a.sum(axis=1).squeeze())[0]
+        cts = np.diff(a.indptr)
+        mu = tot / cts
+        d = diags(mu, 0)
+        b = a.copy()
+        b.data = np.ones_like(b.data)
+        pivot_table = (a - d*b)
+        print("Subtracting the mean from rows took: {:.3f}".format(time.time() - headers_tm))
+
         return pivot_table
 
     def predict_rating_for_movie(self, target_movie_id, target_user_id, movies_seen_by_target_user):
@@ -99,7 +109,7 @@ class CollaborativeFiltering(object):
         print("User-Based Prediction process for user: <", target_user_id, "> started")
         if target_user_id > len(self.users_ids)-1:
             print("Warning: User not exist on dataset")
-            return
+            return []
         # get similar users
         user_similarities = cosine_similarity(
             self.pivot_table,
@@ -115,6 +125,9 @@ class CollaborativeFiltering(object):
         movies_seen_by_similar_users = set(movies_seen_by_similar_users)
         # get the movies the target has seen
         movies_seen_by_target_user = self.pivot_table.getrow(target_user_id - 1).nonzero()[1]
+        if len(movies_seen_by_target_user) == 0:
+            print("User has not see any movies!")
+            return []
         # movies that user has not seen but similar user has
         movies_under_consideration = list(movies_seen_by_similar_users - set(movies_seen_by_target_user))
         # for each movie get the avg and predict the best one
@@ -149,18 +162,18 @@ class CollaborativeFiltering(object):
             return []
         while not should_stop:
             for movie in movies_seen_by_target_user:
-                similarity_movies = cosine_similarity(
+                similarity_with_other_movies = cosine_similarity(
                     self.pivot_table.transpose(),
                     self.pivot_table.getcol(movie).transpose()
                 )
                 k = 0
                 move_on = False
-                sorted_similar_movies = (-similarity_movies).argsort(axis=0)
+                sorted_similar_movies = (-similarity_with_other_movies).argsort(axis=0)
                 while True:
                     most_similar_movie_id = sorted_similar_movies[k][0]
                     if most_similar_movie_id in already_checked_movies or\
                             most_similar_movie_id in movies_seen_by_target_user:
-                        if k >= similarity_movies.shape[0]:
+                        if k >= similarity_with_other_movies.shape[0]:
                             move_on = True
                             break
                         k += 1
@@ -248,10 +261,6 @@ if __name__ == '__main__':
     arguments = vars(args)
     print("Given args: ", arguments)
 
-    # ratings_path = os.path.join("..", "ml-25m", "ratings.csv")
-    # pivot_table_path = os.path.join("..", "ml-25m", "fixed_pivot_table.sparse")
-
-    # cf = CollaborativeFiltering(ratings_path, pivot_table_path=pivot_table_path, load=True)
     cf = CollaborativeFiltering(
         method=arguments['method'],
         ratings_file_path=arguments['ratings_path'],
@@ -271,8 +280,8 @@ if __name__ == '__main__':
                 continue
             results = cf.predict(uid)
             print("MOVIE ID, RATING, METHOD")
-            for movie_id, r, m in results:
-                print(movie_id, r, m)
+            for i, (movie_id, r, m) in enumerate(results):
+                print((i+1), ")", movie_id, r, m)
     except KeyboardInterrupt:
         pass
     print("bye")
