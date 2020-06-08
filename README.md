@@ -8,6 +8,6 @@ A school project for the Big Data lesson.
 
 Impelemntation of:
 - Disk Based KMeans
-- Collaborative filtering 
+- Disk Based Collaborative filtering 
 
 For the **movielens** dataset
