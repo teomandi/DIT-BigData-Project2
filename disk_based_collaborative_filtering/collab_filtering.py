@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
 import os
+import csv
 import time
+import math
 from sklearn.metrics.pairwise import cosine_similarity
-from scipy.sparse import csr_matrix, lil_matrix, diags
+from scipy.sparse import csr_matrix, diags
 import pickle
 import argparse
 
@@ -25,20 +27,11 @@ class CollaborativeFiltering(object):
             exit(1)
         self.ratings_file_path = ratings_file_path
         self.users_ids, self.movies_ids = self.collect_movies_and_users()
-        if load:
-            if pivot_table_path is not None:
-                self.pivot_table = pickle_load(pivot_table_path)
-            else:
-                print("Error: Could not load pivot table without path")
-                exit(1)
-        else:
-            self.pivot_table = self.create_pivot_table()
-            if store:
-                if pivot_table_path is not None:
-                    print("Storing PivotTable")
-                    pickle_store(self.pivot_table, pivot_table_path)
-                else:
-                    print("Warning: Could not store pivot table without path")
+
+        self.pivot_dir = "pivot-tables"
+        self.users_per_table = 30000
+        # self.create_pivot_tables()
+
         if method == "user":
             self.predict = self.user_based_prediction
         elif method == "item":
@@ -65,31 +58,86 @@ class CollaborativeFiltering(object):
         print("Collecting User+Movies took {:.3f}".format(time.time() - headers_tm))
         return users_ids, movies_ids
 
-    def create_pivot_table(self):
-        print("Creating pivot table starts")
-        iteration = 0
-        headers_tm = time.time()
-        a = csr_matrix((len(self.users_ids), len(self.movies_ids)))
-        for chunk in pd.read_csv(self.ratings_file_path, chunksize=100000):
-            rows = [i - 1 for i in chunk['userId'].tolist()]
-            cols = [np.where(self.movies_ids == j)[0][0] for j in chunk['movieId']]
-            values = chunk['rating'].tolist()
-            # fixed_ratings = [rat - chunk[chunk['userId'] == u].mean()['rating']
-            #                  for u, rat in zip(chunk['userId'], chunk['rating'])]
-            a[rows, cols] = values
-            iteration += 1
-        print("Creating pivot_table took: {:.3f}".format(time.time() - headers_tm))
-        headers_tm = time.time()
-        tot = np.array(a.sum(axis=1).squeeze())[0]
-        cts = np.diff(a.indptr)
+    def create_table(self, shape, rows, cols, values):
+        table = csr_matrix((values, (rows, cols)), shape=shape)
+        # fix the values
+        tot = np.array(table.sum(axis=1).squeeze())[0]
+        cts = np.diff(table.indptr)
         mu = tot / cts
         d = diags(mu, 0)
-        b = a.copy()
+        b = table.copy()
         b.data = np.ones_like(b.data)
-        pivot_table = (a - d*b)
-        print("Subtracting the mean from rows took: {:.3f}".format(time.time() - headers_tm))
+        ptable = (table - d*b)
+        print("table completed")
+        return ptable
 
-        return pivot_table
+    def create_pivot_tables(self):
+        headers_tm = time.time()
+        print("Creating the pivot-tables starts")
+        if not os.path.isdir(self.pivot_dir):
+            print("Directory for the tables created.")
+            os.mkdir(self.pivot_dir)
+        with open(self.ratings_file_path) as f:
+            current_users_in_table = 0
+            current_table_index = 0
+            last_user_id = 0
+            counting_users = 0
+            rows = []  # for movies
+            cols = []  # for users
+            values = []  # for ratings
+            reader = csv.reader(f)
+            current_bucket_users = 0
+            for row in reader:
+                stored = False
+                try:  # for the first row
+                    user_id = int(row[0])
+                    movie_id = int(row[1])
+                    rating = float(row[2])
+                except:
+                    continue
+                if last_user_id == user_id:
+                    rows.append((user_id-1) - self.users_per_table * current_table_index)
+                    cols.append(np.where(self.movies_ids == movie_id)[0][0])
+                    values.append(rating)
+                else:
+                    last_user_id = user_id
+                    counting_users += 1
+                    # firstly we check if we have reach the amount of users in the current table
+                    if current_users_in_table == self.users_per_table:
+                        print("Table ", current_table_index, " is full. Table is created and stored ", current_bucket_users)
+                        current_table = self.create_table(
+                            (current_bucket_users, len(self.movies_ids)),
+                            rows, cols, values
+                        )
+                        pickle_store(
+                            current_table,
+                            os.path.join(self.pivot_dir, str(current_table_index)+"-ptable.sparse")
+                        )
+                        stored = True
+                        current_table_index += 1
+                        current_bucket_users = 1
+                        current_users_in_table = 1  # because we add the first user below
+                        rows = [(user_id-1) - self.users_per_table * current_table_index]
+                        cols = [np.where(self.movies_ids == movie_id)[0][0]]
+                        values = [rating]
+                    else:
+                        current_bucket_users += 1
+                        current_users_in_table += 1
+                        rows.append((user_id-1) - self.users_per_table * current_table_index)
+                        cols.append(np.where(self.movies_ids == movie_id)[0][0])
+                        values.append(rating)
+        if not stored:
+            print("storing last table")
+            current_table = self.create_table(
+                (self.users_per_table, len(self.movies_ids)),
+                rows, cols, values
+            )
+            pickle_store(
+                current_table,
+                os.path.join(self.pivot_dir, str(current_table_index) + "-ptable.sparse")
+            )
+        print("Creating the pivot-tables took: {:.3f}".format(time.time() - headers_tm))
+        print("counted ", counting_users, " users")
 
     def predict_rating_for_movie(self, target_movie_id, target_user_id, movies_seen_by_target_user):
         similarity_movies = cosine_similarity(
@@ -111,30 +159,62 @@ class CollaborativeFiltering(object):
             print("Warning: User not exist on dataset")
             return []
         # get similar users
-        user_similarities = cosine_similarity(
-            self.pivot_table,
-            self.pivot_table.getrow(target_user_id - 1)
-        )
+        target_table_id = int((target_user_id-1)/self.users_per_table)
+        target_table = pickle_load(os.path.join(self.pivot_dir, str(target_table_id)+"-ptable.sparse"))
+        target_user_row_id = (target_user_id-1) - target_table_id * self.users_per_table
+        target_user_ratings = target_table.getrow(target_user_row_id)
+        # get the movies the target has seen
+        movies_seen_by_target_user = target_user_ratings.nonzero()[1]
+        if len(movies_seen_by_target_user) == 0:
+            print("User has not see any movies!")
+            return []
+        first = True
+        user_similarities = None
+        for t_id in range(math.ceil(len(self.users_ids)/self.users_per_table)):
+            print("tableid: ", t_id)
+            current_table = pickle_load(os.path.join(self.pivot_dir, str(t_id)+"-ptable.sparse"))
+            similarities = cosine_similarity(
+                current_table,
+                target_user_ratings
+            )
+            if first:
+                user_similarities = similarities
+                first = False
+            else:
+                user_similarities = np.vstack((user_similarities, similarities))
+        print("users similarities shape: ", user_similarities.shape)
         # get top 20 similar users
         similar_users = (-user_similarities).argsort(axis=0)
         most_similar_users = (similar_users[1:21]).squeeze().tolist()
         # get the movies that those users has seen
         movies_seen_by_similar_users = []
         for user in most_similar_users:
-            movies_seen_by_similar_users.extend(self.pivot_table.getrow(user).nonzero()[1])
+            table_id_with_that_user = int(user/self.users_per_table)
+            users_table = pickle_load(os.path.join(self.pivot_dir, str(table_id_with_that_user)+"-ptable.sparse"))
+            users_row = user - table_id_with_that_user * self.users_per_table
+            movies_seen_by_similar_users.extend(users_table.getrow(users_row).nonzero()[1])
         movies_seen_by_similar_users = set(movies_seen_by_similar_users)
-        # get the movies the target has seen
-        movies_seen_by_target_user = self.pivot_table.getrow(target_user_id - 1).nonzero()[1]
-        if len(movies_seen_by_target_user) == 0:
-            print("User has not see any movies!")
-            return []
+
         # movies that user has not seen but similar user has
         movies_under_consideration = list(movies_seen_by_similar_users - set(movies_seen_by_target_user))
         # for each movie get the avg and predict the best one
         movie_avg_ratings = []
         print("under cons movies are ", len(movies_under_consideration))
         for movie in movies_under_consideration:
-            movie_ratings = self.pivot_table[most_similar_users, movie].toarray().squeeze().tolist()
+            movie_ratings = []
+            # find which tables and which uses
+            tables_id_to_check = {}
+            for user in most_similar_users:
+                table_id_with_that_user = int(user / self.users_per_table)
+                if table_id_with_that_user not in tables_id_to_check:
+                    tables_id_to_check[table_id_with_that_user] = []
+                tables_id_to_check[table_id_with_that_user].append(user - table_id_with_that_user * self.users_per_table)
+            for table_id in tables_id_to_check:
+                table = pickle_load(os.path.join(self.pivot_dir, str(table_id)+"-ptable.sparse"))
+                try:
+                    movie_ratings.extend(list(table[tables_id_to_check[table_id], movie].toarray().squeeze().tolist()))
+                except TypeError:  # when is only one
+                    movie_ratings.append(table[tables_id_to_check[table_id], movie].toarray().squeeze())
             # movie_avg_ratings.append(sum(movie_ratings) / len(movie_ratings))  # option 1
             movie_avg_ratings.append(
                 sum([r*user_similarities[sid][0] for r, sid in zip(movie_ratings, most_similar_users)])
@@ -217,57 +297,58 @@ class CollaborativeFiltering(object):
 
 
 if __name__ == '__main__':
+    cf = CollaborativeFiltering("user", "../ml-25m/ratings.csv")
 
-    parser = argparse.ArgumentParser(
-        description='Disk Based Collaborative Filtering. Project 2b Big-Data 2020',
-        epilog='Enjoy the program! :)'
-    )
-    parser.add_argument(
-        '-m',
-        '--method',
-        type=str,
-        help='Selected method for predicting movies. Accepted Options are \'user\', \'item\', \'mix\'',
-        action='store',
-        required=True)
-    parser.add_argument(
-        '-r',
-        '--ratings_path',
-        type=str,
-        help="The path for the ratings file. Required for d3, d4. Relative and Absolute are accepted",
-        required=True)
-    # optional arguments
-    parser.add_argument(
-        '-p',
-        '--pivot_table_path',
-        type=str,
-        help="The path for the pivot_table file. It will load or store it there according to the other arguments",
-    )
-    parser.add_argument(
-        '-l',
-        '--load',
-        help="If this argument is given, the program will try to load the pivot table from the pivot_table_path",
-        default=False,
-        action='store_true'
-    )
-    parser.add_argument(
-        '-s',
-        '--store',
-        help="If this argument is given, the program will store the generated pivot table to the pivot_table_path",
-        default=False,
-        action='store_true'
-    )
-
-    args = parser.parse_args()
-    arguments = vars(args)
-    print("Given args: ", arguments)
-
-    cf = CollaborativeFiltering(
-        method=arguments['method'],
-        ratings_file_path=arguments['ratings_path'],
-        pivot_table_path=arguments['pivot_table_path'],
-        store=arguments['store'],
-        load=arguments['load']
-    )
+    # parser = argparse.ArgumentParser(
+    #     description='Disk Based Collaborative Filtering. Project 2b Big-Data 2020',
+    #     epilog='Enjoy the program! :)'
+    # )
+    # parser.add_argument(
+    #     '-m',
+    #     '--method',
+    #     type=str,
+    #     help='Selected method for predicting movies. Accepted Options are \'user\', \'item\', \'mix\'',
+    #     action='store',
+    #     required=True)
+    # parser.add_argument(
+    #     '-r',
+    #     '--ratings_path',
+    #     type=str,
+    #     help="The path for the ratings file. Required for d3, d4. Relative and Absolute are accepted",
+    #     required=True)
+    # # optional arguments
+    # parser.add_argument(
+    #     '-p',
+    #     '--pivot_table_path',
+    #     type=str,
+    #     help="The path for the pivot_table file. It will load or store it there according to the other arguments",
+    # )
+    # parser.add_argument(
+    #     '-l',
+    #     '--load',
+    #     help="If this argument is given, the program will try to load the pivot table from the pivot_table_path",
+    #     default=False,
+    #     action='store_true'
+    # )
+    # parser.add_argument(
+    #     '-s',
+    #     '--store',
+    #     help="If this argument is given, the program will store the generated pivot table to the pivot_table_path",
+    #     default=False,
+    #     action='store_true'
+    # )
+    #
+    # args = parser.parse_args()
+    # arguments = vars(args)
+    # print("Given args: ", arguments)
+    #
+    # cf = CollaborativeFiltering(
+    #     method=arguments['method'],
+    #     ratings_file_path=arguments['ratings_path'],
+    #     pivot_table_path=arguments['pivot_table_path'],
+    #     store=arguments['store'],
+    #     load=arguments['load']
+    # )
     try:
         while True:
             uid = input("Give user id: ")
@@ -280,8 +361,8 @@ if __name__ == '__main__':
                 continue
             results = cf.predict(uid)
             print("MOVIE ID, RATING, METHOD")
-            for i, (movie_id, r, m) in enumerate(results):
-                print((i+1), ")", movie_id, r, m)
+            for i, (movie_idx, r, m) in enumerate(results):
+                print((i+1), ")", movie_idx, r, m)
     except KeyboardInterrupt:
         pass
     print("bye")

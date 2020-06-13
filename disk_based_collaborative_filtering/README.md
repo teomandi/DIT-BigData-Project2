@@ -69,10 +69,10 @@ The pivot table needs about 10 minutes to be created.
 # Examples
 
 ## user-based
-`python disk_based_collaborative_filtering/collab_filtering.py -m item -r ml-25m/ratings.csv -p lil_pivot_table.sparse --store`
+`python disk_based_collaborative_filtering/collab_filtering.py -m user -r ml-25m/ratings.csv -p pivot_table.sparse --store`
 
 ## item-based
-`python disk_based_collaborative_filtering/collab_filtering.py -m item -r ml-25m/ratings.csv -p lil_pivot_table.sparse --load`
+`python disk_based_collaborative_filtering/collab_filtering.py -m item -r ml-25m/ratings.csv -p pivot_table.sparse --load`
 
 ## mix
 `python disk_based_collaborative_filtering/collab_filtering.py -m mix -r ml-25m/ratings.csv`  ## will generate the table
