@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="680828c2-c936-4539-a5c6-3d297fd3360b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/disk_based_collaborative_filtering/quotes.png" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,7 +40,7 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../project1" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -185,6 +184,8 @@
       <workItem from="1591438911923" duration="26905000" />
       <workItem from="1591519354132" duration="30593000" />
       <workItem from="1591608188555" duration="177000" />
+      <workItem from="1591904014683" duration="951000" />
+      <workItem from="1592046214415" duration="882000" />
     </task>
     <servers />
   </component>
