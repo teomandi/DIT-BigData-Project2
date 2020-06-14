@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="680828c2-c936-4539-a5c6-3d297fd3360b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/disk_based_collaborative_filtering/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/disk_based_collaborative_filtering/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/disk_based_collaborative_filtering/collab_filtering.py" beforeDir="false" afterPath="$PROJECT_DIR$/disk_based_collaborative_filtering/collab_filtering.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -187,7 +186,8 @@
       <workItem from="1591519354132" duration="30593000" />
       <workItem from="1591608188555" duration="177000" />
       <workItem from="1591904014683" duration="951000" />
-      <workItem from="1592046214415" duration="15466000" />
+      <workItem from="1592046214415" duration="16941000" />
+      <workItem from="1592135468857" duration="13696000" />
     </task>
     <servers />
   </component>
@@ -217,30 +217,30 @@
     </state>
     <state x="770" y="310" key="FileChooserDialogImpl/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1591561331444" />
     <state x="770" y="310" width="424" height="491" key="FileChooserDialogImpl/54.25.1866.1055@54.25.1866.1055" timestamp="1588357992030" />
-    <state width="1822" height="222" key="GridCell.Tab.0.bottom" timestamp="1592067517592">
+    <state width="1822" height="204" key="GridCell.Tab.0.bottom" timestamp="1592156661607">
       <screen x="56" y="25" width="1864" height="1055" />
     </state>
     <state width="1824" height="222" key="GridCell.Tab.0.bottom/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1591581489109" />
     <state width="1824" height="93" key="GridCell.Tab.0.bottom/54.25.1866.1055@54.25.1866.1055" timestamp="1590682364131" />
-    <state width="1822" height="222" key="GridCell.Tab.0.bottom/56.25.1864.1055/1920.0.1680.1050@56.25.1864.1055" timestamp="1592067517592" />
-    <state width="1822" height="222" key="GridCell.Tab.0.center" timestamp="1592067517592">
+    <state width="1822" height="204" key="GridCell.Tab.0.bottom/56.25.1864.1055/1920.0.1680.1050@56.25.1864.1055" timestamp="1592156661607" />
+    <state width="1822" height="204" key="GridCell.Tab.0.center" timestamp="1592156661606">
       <screen x="56" y="25" width="1864" height="1055" />
     </state>
     <state width="1824" height="222" key="GridCell.Tab.0.center/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1591581489109" />
     <state width="1824" height="93" key="GridCell.Tab.0.center/54.25.1866.1055@54.25.1866.1055" timestamp="1590682364130" />
-    <state width="1822" height="222" key="GridCell.Tab.0.center/56.25.1864.1055/1920.0.1680.1050@56.25.1864.1055" timestamp="1592067517592" />
-    <state width="1822" height="222" key="GridCell.Tab.0.left" timestamp="1592067517591">
+    <state width="1822" height="204" key="GridCell.Tab.0.center/56.25.1864.1055/1920.0.1680.1050@56.25.1864.1055" timestamp="1592156661606" />
+    <state width="1822" height="204" key="GridCell.Tab.0.left" timestamp="1592156661606">
       <screen x="56" y="25" width="1864" height="1055" />
     </state>
     <state width="1824" height="222" key="GridCell.Tab.0.left/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1591581489108" />
     <state width="1824" height="93" key="GridCell.Tab.0.left/54.25.1866.1055@54.25.1866.1055" timestamp="1590682364130" />
-    <state width="1822" height="222" key="GridCell.Tab.0.left/56.25.1864.1055/1920.0.1680.1050@56.25.1864.1055" timestamp="1592067517591" />
-    <state width="1822" height="222" key="GridCell.Tab.0.right" timestamp="1592067517592">
+    <state width="1822" height="204" key="GridCell.Tab.0.left/56.25.1864.1055/1920.0.1680.1050@56.25.1864.1055" timestamp="1592156661606" />
+    <state width="1822" height="204" key="GridCell.Tab.0.right" timestamp="1592156661607">
       <screen x="56" y="25" width="1864" height="1055" />
     </state>
     <state width="1824" height="222" key="GridCell.Tab.0.right/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1591581489109" />
     <state width="1824" height="93" key="GridCell.Tab.0.right/54.25.1866.1055@54.25.1866.1055" timestamp="1590682364130" />
-    <state width="1822" height="222" key="GridCell.Tab.0.right/56.25.1864.1055/1920.0.1680.1050@56.25.1864.1055" timestamp="1592067517592" />
+    <state width="1822" height="204" key="GridCell.Tab.0.right/56.25.1864.1055/1920.0.1680.1050@56.25.1864.1055" timestamp="1592156661607" />
     <state width="1824" height="342" key="GridCell.Tab.1.bottom" timestamp="1590248506080">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
@@ -261,17 +261,18 @@
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
     <state x="491" y="187" width="992" height="737" key="SettingsEditor/54.25.1866.1055@54.25.1866.1055" timestamp="1587914856891" />
-    <state x="669" y="379" key="com.intellij.ide.util.TipDialog" timestamp="1591608195167">
-      <screen x="54" y="25" width="1866" height="1055" />
+    <state x="670" y="379" key="com.intellij.ide.util.TipDialog" timestamp="1592135508470">
+      <screen x="56" y="25" width="1864" height="1055" />
     </state>
     <state x="669" y="379" key="com.intellij.ide.util.TipDialog/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1591608195167" />
     <state x="670" y="380" key="com.intellij.ide.util.TipDialog/54.25.1866.1055@54.25.1866.1055" timestamp="1590682239855" />
-    <state x="641" y="170" width="540" height="771" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1592060351356">
+    <state x="670" y="379" key="com.intellij.ide.util.TipDialog/56.25.1864.1055/1920.0.1680.1050@56.25.1864.1055" timestamp="1592135508470" />
+    <state x="641" y="170" width="683" height="771" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1592140172958">
       <screen x="56" y="25" width="1864" height="1055" />
     </state>
     <state x="640" y="170" width="540" height="771" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/54.25.1866.1055/1920.0.1680.1050@54.25.1866.1055" timestamp="1591458890681" />
     <state x="640" y="170" width="683" height="771" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/54.25.1866.1055@54.25.1866.1055" timestamp="1589645000163" />
-    <state x="641" y="170" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/56.25.1864.1055/1920.0.1680.1050@56.25.1864.1055" timestamp="1592060351356" />
+    <state x="641" y="170" width="683" height="771" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/56.25.1864.1055/1920.0.1680.1050@56.25.1864.1055" timestamp="1592140172958" />
     <state x="784" y="472" width="405" height="167" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1591438827792">
       <screen x="54" y="25" width="1866" height="1055" />
     </state>
@@ -300,6 +301,6 @@
     <SUITE FILE_PATH="coverage/project2$kmeans.coverage" NAME="kmeans Coverage Results" MODIFIED="1592056869437" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/disk_based_kmeans" />
     <SUITE FILE_PATH="coverage/project2$disk_based_kmeans.coverage" NAME="disk_based_kmeans Coverage Results" MODIFIED="1588353713338" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/disk_based_kmeans" />
     <SUITE FILE_PATH="coverage/project2$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1589625973219" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/disk_based_kmeans" />
-    <SUITE FILE_PATH="coverage/project2$collab_filtering.coverage" NAME="collab_filtering Coverage Results" MODIFIED="1592067517564" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/disk_based_collaborative_filtering" />
+    <SUITE FILE_PATH="coverage/project2$collab_filtering.coverage" NAME="collab_filtering Coverage Results" MODIFIED="1592156661589" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/disk_based_collaborative_filtering" />
   </component>
 </project>
