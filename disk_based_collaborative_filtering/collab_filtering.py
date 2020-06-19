@@ -100,7 +100,7 @@ class CollaborativeFiltering(object):
                             rows, cols, values
                         )
                         save_npz(
-                            os.path.join(self.pivot_dir, str(current_table_index)+"-ptable.sparse"),
+                            os.path.join(self.pivot_dir, str(current_table_index)+"-ptable.npz"),
                             current_table
                         )
                         stored = True
@@ -123,7 +123,7 @@ class CollaborativeFiltering(object):
                 rows, cols, values
             )
             save_npz(
-                os.path.join(self.pivot_dir, str(current_table_index) + "-ptable.sparse"),
+                os.path.join(self.pivot_dir, str(current_table_index) + "-ptable.npz"),
                 current_table
             )
             print("Table ", current_table_index, " is full. Table is created and stored ", current_bucket_users)
@@ -133,7 +133,7 @@ class CollaborativeFiltering(object):
     def predict_rating_for_movie(self, target_user_ratings, target_movie_id, movies_seen_by_target_user):
         first = True
         for tid in range(math.ceil(len(self.users_ids) / self.users_per_table)):
-            table = load_npz(os.path.join(self.pivot_dir, str(tid) + "-ptable.sparse"))
+            table = load_npz(os.path.join(self.pivot_dir, str(tid) + "-ptable.npz"))
             if first:
                 target_movie_ratings = table.getcol(target_movie_id)
                 first = False
@@ -148,7 +148,7 @@ class CollaborativeFiltering(object):
                 stop = len(self.movies_ids)
             mfirst = True
             for tid in range(math.ceil(len(self.users_ids) / self.users_per_table)):
-                table = load_npz(os.path.join(self.pivot_dir, str(tid) + "-ptable.sparse"))
+                table = load_npz(os.path.join(self.pivot_dir, str(tid) + "-ptable.npz"))
                 if mfirst:
                     other_movies_ratings = table[:, start:stop]
                     mfirst = False
@@ -179,7 +179,7 @@ class CollaborativeFiltering(object):
             return []
         # get similar users
         target_table_id = int((target_user_id-1)/self.users_per_table)
-        target_table = load_npz(os.path.join(self.pivot_dir, str(target_table_id)+"-ptable.sparse"))
+        target_table = load_npz(os.path.join(self.pivot_dir, str(target_table_id)+"-ptable.npz"))
         target_user_row_id = (target_user_id-1) - target_table_id * self.users_per_table
         target_user_ratings = target_table.getrow(target_user_row_id)
         # get the movies the target has seen
@@ -190,7 +190,7 @@ class CollaborativeFiltering(object):
         first = True
         user_similarities = None
         for t_id in range(math.ceil(len(self.users_ids)/self.users_per_table)):
-            current_table = load_npz(os.path.join(self.pivot_dir, str(t_id)+"-ptable.sparse"))
+            current_table = load_npz(os.path.join(self.pivot_dir, str(t_id)+"-ptable.npz"))
             similarities = cosine_similarity(
                 current_table,
                 target_user_ratings
@@ -207,7 +207,7 @@ class CollaborativeFiltering(object):
         movies_seen_by_similar_users = []
         for user in most_similar_users:
             table_id_with_that_user = int(user/self.users_per_table)
-            users_table = load_npz(os.path.join(self.pivot_dir, str(table_id_with_that_user)+"-ptable.sparse"))
+            users_table = load_npz(os.path.join(self.pivot_dir, str(table_id_with_that_user)+"-ptable.npz"))
             users_row = user - table_id_with_that_user * self.users_per_table
             movies_seen_by_similar_users.extend(users_table.getrow(users_row).nonzero()[1])
         movies_seen_by_similar_users = set(movies_seen_by_similar_users)
@@ -215,6 +215,7 @@ class CollaborativeFiltering(object):
         movies_under_consideration = list(movies_seen_by_similar_users - set(movies_seen_by_target_user))
         # for each movie get the avg and predict the best one
         movie_avg_ratings = []
+        print("Movies under considerations are : ", len(movies_under_consideration))
         for movie in movies_under_consideration:
             movie_ratings = []
             # find which tables and which uses
@@ -225,7 +226,7 @@ class CollaborativeFiltering(object):
                     tables_id_to_check[table_id_with_that_user] = []
                 tables_id_to_check[table_id_with_that_user].append(user - table_id_with_that_user * self.users_per_table)
             for table_id in tables_id_to_check:
-                table = load_npz(os.path.join(self.pivot_dir, str(table_id)+"-ptable.sparse"))
+                table = load_npz(os.path.join(self.pivot_dir, str(table_id)+"-ptable.npz"))
                 try:
                     movie_ratings.extend(list(table[tables_id_to_check[table_id], movie].toarray().squeeze().tolist()))
                 except TypeError:  # when is only one
@@ -246,7 +247,7 @@ class CollaborativeFiltering(object):
             print("Warning: User not exist on dataset")
             return
         target_table_id = int((target_user_id - 1) / self.users_per_table)
-        target_table = load_npz(os.path.join(self.pivot_dir, str(target_table_id) + "-ptable.sparse"))
+        target_table = load_npz(os.path.join(self.pivot_dir, str(target_table_id) + "-ptable.npz"))
         target_user_row_id = (target_user_id - 1) - target_table_id * self.users_per_table
         target_user_ratings = target_table.getrow(target_user_row_id)
         # get the movies the target has seen
@@ -268,7 +269,7 @@ class CollaborativeFiltering(object):
                 # get the movie vector from the tables
                 first = True
                 for tid in range(math.ceil(len(self.users_ids) / self.users_per_table)):
-                    table = load_npz(os.path.join(self.pivot_dir, str(tid) + "-ptable.sparse"))
+                    table = load_npz(os.path.join(self.pivot_dir, str(tid) + "-ptable.npz"))
                     if first:
                         movie_ratings = table.getcol(movie)
                         first = False
@@ -282,7 +283,7 @@ class CollaborativeFiltering(object):
                         stop = len(self.movies_ids)
                     mfirst = True
                     for tid in range(math.ceil(len(self.users_ids) / self.users_per_table)):
-                        table = load_npz(os.path.join(self.pivot_dir, str(tid) + "-ptable.sparse"))
+                        table = load_npz(os.path.join(self.pivot_dir, str(tid) + "-ptable.npz"))
                         if mfirst:
                             other_movies_ratings = table[:, start:stop]
                             mfirst = False
@@ -394,7 +395,9 @@ if __name__ == '__main__':
                 print("Invalid value..")
                 continue
             results = cf.predict(uid)
-            print("MOVIE ID, RATING, METHOD")
+            if results is None:
+                continue
+            print("MOVIE ID, SCORE, METHOD")
             for i, (movie_idx, r, m) in enumerate(results):
                 print((i+1), ")", movie_idx, r, m)
     except KeyboardInterrupt:

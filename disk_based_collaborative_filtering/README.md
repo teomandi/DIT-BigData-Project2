@@ -12,11 +12,11 @@
 The program is made to run on python3 only!
 
 The program gets most of the inputs as arguments by using the *Argparse* module. Only the *user_id* input is given in a 
-while true loop. In each loop you can search for a different user.
+while true loop. In each loop you can search for a different user, with the same method.
  
 ### Output
 In the end of the processing the program prints 20 rows with the results. Each row contains the movieId, 
-the similarity rank, and the method that used to calculate it ('u' for user, 'i' for item). The results are sorted, 
+the similarity score, and the method that used to calculate it ('u' for user, 'i' for item). The results are sorted, 
 staring with the best suggestion 
 
 ### Quit
@@ -28,11 +28,9 @@ The required arguments are:
 - `-r` or `--ratings_path`: The path where the ratings file is located
 
 Optional arguments are:
-- `-p` or `--pivot_table_path`: The path to store/load the pivot table
-- -`--load` or `-l`: If this flag exists it will try to load the pivot table from the path
-- -`--store` or `-s`: If this flag exists it will try to store the pivot table in the given path
+- `--load` or `-l`: If this flag exists it will try to load the pivot tables from the known path
 
-You can check the help menu with the -h argument.
+You can check the help menu with the `-h` argument.
 
 ---
 
@@ -41,38 +39,30 @@ The main executable program is called `collab_filtering.py` and it can be execut
 
 `python collab_filtering.py -m <method> -r path/to/ratings.csv` 
 
-or if you want to store the pivot table (see bellow) in order to avoid recreating it, execute like:
+or if you want to load the pivot tables (see bellow) in order to avoid recreating them, execute like:
 
-`python collab_filtering.py -m <method> -r path/to/ratings.csv -p 'path/to/wanted/name.sparce --store`
-
-or if it is already stored like:
-
-`python collab_filtering.py -m <method> -r path/to/ratings.csv -p 'path/to/wanted/name.sparce --load`
+`python collab_filtering.py -m <method> -r path/to/ratings.csv --load`
 
 ---
 
-## Pivot Table
-The program, in order to predict and recommend movies, it generates a sparse pivot table. This table contains the 
-information about all the rates a user made for every movie. This pivot table is created by parsing the ratings csv and
-requires about **10 minutes** to be build with respect of the memory. 
+## Multiple Pivot Tables
+The program, in order to predict and recommend movies, it parse the ratings file line by line the csv file and creates 
+multiple pivot tables which they are stored in the **`pivot-tables` folder which is created in the working directory**.
+Each table contains the ratings for 30.000 users. The creation of those tables requires about 10 minutes  
 
-### Reusing the pivot table
-In order to avoid recreating the pivot table every time, it can be created once and then, to be reused. By using the
-`--store` argument the program will store that sparse matrix in the path that was given from the `-p` argument. 
-Similarly, if the table is already stored, it can be loaded using the `--load` argument form the given path. For loading
-and storing the program uses the *pickle* module.
+Those tables are **csr sparse matrices**. They are stored with the `save_npz` and loaded with the `load_npz`.
 
-The pivot table needs about 10 minutes to be created.
+The tables can be reused by using the `--load` argument. 
 
 ---
 
 # Examples
 
 ## user-based
-`python disk_based_collaborative_filtering/collab_filtering.py -m user -r ml-25m/ratings.csv -p pivot_table.sparse --store`
+`python disk_based_collaborative_filtering/collab_filtering.py -m user -r ml-25m/ratings.csv`
 
 ## item-based
-`python disk_based_collaborative_filtering/collab_filtering.py -m item -r ml-25m/ratings.csv -p pivot_table.sparse --load`
+`python disk_based_collaborative_filtering/collab_filtering.py -m item -r ml-25m/ratings.csv  --load`
 
 ## mix
-`python disk_based_collaborative_filtering/collab_filtering.py -m mix -r ml-25m/ratings.csv`  ## will generate the table
+`python disk_based_collaborative_filtering/collab_filtering.py -m mix -r ml-25m/ratings.csv` 

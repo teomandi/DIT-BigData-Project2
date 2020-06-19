@@ -7,6 +7,8 @@ ml-25m/
 *.log
 *.txt
 *.sparse
+*.npz
+pivot-tables/
 __pycache__
 idea/workspace.xml
 
